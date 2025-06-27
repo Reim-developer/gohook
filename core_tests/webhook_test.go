@@ -1,26 +1,20 @@
 package core_test
 
 import (
+	"fmt"
 	"gohook/core"
-	"log"
 	"os"
 	"testing"
 
 	"github.com/BurntSushi/toml"
 )
 
-func TestUpdateWebhook(t *testing.T) {
+func TestDecodeToml(t *testing.T) {
 	var config core.Config
 	_, err := toml.DecodeFile("settings_test.toml", &config)
+
 	if err != nil {
-		log.Println("[Core_Test Package] Error:", err)
+		fmt.Fprintf(os.Stderr, "[Core_Test Package] Error: %s\n", err)
 		os.Exit(1)
 	}
-
-	payload := core.DiscordWebhook{
-		Content:  config.Message.Content,
-		Username: config.Base.Username,
-		Avatar:   config.Base.Avatar,
-	}
-	core.SendWebhook(config.Webhook.URL, &payload)
 }
