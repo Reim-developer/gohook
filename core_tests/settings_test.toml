@@ -1,0 +1,12 @@
+[Webhook]
+url = "My Webhook URL"
+
+[Base]
+username = "My User Name"
+avatar_url = "My avatar URL"
+
+[Message]
+content = "Hello World"
+
+[Embed]
+title = ""
