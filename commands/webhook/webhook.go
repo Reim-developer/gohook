@@ -78,7 +78,11 @@ func handlerCommand(params *commandParameters) {
 	}
 
 	handerDryRun(params.dryMode, &payload)
-	core.SendWebhook(config.Webhook.URL, &payload)
+	err = core.SendWebhook(config.Webhook.URL, &payload)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "[CRITICAL] Critical error: %s\n", err)
+		os.Exit(1)
+	}
 
 	fmt.Fprintln(os.Stdout, "[OK] Successfully send webhook")
 
