@@ -2,7 +2,7 @@ package core
 
 type Config struct {
 	Webhook struct {
-		URL string `toml:"url"`
+		URL *string `toml:"url"`
 	} `toml:"Webhook"`
 
 	Base struct {
