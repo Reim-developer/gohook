@@ -3,6 +3,7 @@ package core
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"net/http"
 )
 
@@ -12,10 +13,14 @@ type DiscordWebhook struct {
 	Avatar   string `json:"avatar_url,omitempty"`
 }
 
-func SendWebhook(URL string, discord_webhook *DiscordWebhook) error {
+func SendWebhook(URL *string, discord_webhook *DiscordWebhook) error {
 	payload, _ := json.Marshal(discord_webhook)
 
-	response, err := http.Post(URL, "application/json", bytes.NewBuffer(payload))
+	if URL == nil || *URL == "" {
+		return errors.New("invalid Webhook URL. Please make sure your webhook URL in TOML setting is valid")
+	}
+
+	response, err := http.Post(*URL, "application/json", bytes.NewBuffer(payload))
 
 	if err != nil {
 		return err
