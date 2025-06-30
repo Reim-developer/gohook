@@ -8,10 +8,17 @@ import (
 	"net/http"
 )
 
+type Embed struct {
+	Title       string `json:"title,omitempty"`
+	Description string `json:"description,omitempty"`
+	Color       int    `json:"color,omitempty"`
+}
+
 type DiscordWebhook struct {
-	Content  string `json:"content,omitempty"`
-	Username string `json:"username,omitempty"`
-	Avatar   string `json:"avatar_url,omitempty"`
+	Content  string  `json:"content,omitempty"`
+	Username string  `json:"username,omitempty"`
+	Avatar   string  `json:"avatar_url,omitempty"`
+	Embeds   []Embed `json:"embeds,omitempty"`
 }
 
 func SendWebhook(URL *string, discord_webhook *DiscordWebhook) error {
