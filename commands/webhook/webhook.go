@@ -72,6 +72,7 @@ func handlerLoopSend(url *string, payload *core.DiscordWebhook, params *commandP
 			fmt.Fprintf(os.Stdout, "[OK] Send webhook success (%d) time(s), delay time: %d\n", i+1, params.delay)
 			time.Sleep(time.Duration(params.delay) * time.Second)
 		}
+		handlerVerbose(params.verbose, payload)
 		os.Exit(core.SUCCESS)
 	}
 }
