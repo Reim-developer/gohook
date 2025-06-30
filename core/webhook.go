@@ -9,9 +9,24 @@ import (
 )
 
 type Embed struct {
-	Title       string `json:"title,omitempty"`
-	Description string `json:"description,omitempty"`
-	Color       int    `json:"color,omitempty"`
+	Title       string          `json:"title,omitempty"`
+	Description string          `json:"description,omitempty"`
+	Color       int             `json:"color,omitempty"`
+	Footer      *EmbedFooter    `json:"footer,omitempty"`
+	Image       *EmbedImage     `json:"image,omitempty"`
+	Thumbnail   *EmbedThumbnail `json:"thumbnail,omitempty"`
+}
+
+type EmbedFooter struct {
+	Text string `json:"text"`
+}
+
+type EmbedImage struct {
+	URL string `json:"url"`
+}
+
+type EmbedThumbnail struct {
+	URL string `json:"url"`
 }
 
 type DiscordWebhook struct {
