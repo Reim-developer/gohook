@@ -15,6 +15,7 @@ type commandParameters struct {
 	tomlConfigPath string
 	verbose        bool
 	dryMode        bool
+	threads        int
 }
 
 func handerDryRun(dryMode bool, payload *core.DiscordWebhook) {
@@ -94,6 +95,7 @@ func WebhookCommand() *cobra.Command {
 	var toml_config_path string
 	var verbose bool
 	var dryMode bool
+	var threads int
 
 	var webhookCommand = &cobra.Command{
 		Use:   "wh-send <TOML Config>",
@@ -106,6 +108,7 @@ func WebhookCommand() *cobra.Command {
 				tomlConfigPath: toml_config_path,
 				verbose:        verbose,
 				dryMode:        dryMode,
+				threads:        threads,
 			}
 
 			handlerCommand(&arguments)
@@ -114,6 +117,8 @@ func WebhookCommand() *cobra.Command {
 
 	webhookCommand.Flags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose mode")
 	webhookCommand.Flags().BoolVarP(&dryMode, "dry-run", "", false, "Enable dry-run mode")
+	webhookCommand.Flags().IntVarP(&threads, "thread", "t", 1, "Enable thread run")
+
 	return webhookCommand
 
 }
