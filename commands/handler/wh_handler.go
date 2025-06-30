@@ -92,11 +92,31 @@ func GetEmbedsSetting(config *core.Config) []core.Embed {
 			color = 0
 		}
 
-		embeds = append(embeds, core.Embed{
+		newEmbed := core.Embed{
 			Title:       embed.Title,
 			Description: embed.Description,
 			Color:       color,
-		})
+		}
+
+		if embed.Footer.Text != "" {
+			newEmbed.Footer = &core.EmbedFooter{
+				Text: embed.Footer.Text,
+			}
+		}
+
+		if embed.Image.URL != "" {
+			newEmbed.Image = &core.EmbedImage{
+				URL: embed.Image.URL,
+			}
+		}
+
+		if embed.Thumbnail.URL != "" {
+			newEmbed.Thumbnail = &core.EmbedThumbnail{
+				URL: embed.Thumbnail.URL,
+			}
+		}
+
+		embeds = append(embeds, newEmbed)
 	}
 
 	return embeds
