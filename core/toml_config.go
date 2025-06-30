@@ -15,7 +15,9 @@ type Config struct {
 		Content string `toml:"content"`
 	} `toml:"Message"`
 
-	Embed struct {
-		Title string `toml:"title"`
-	} `toml:"Embed"`
+	Embeds []struct {
+		Title       string `toml:"title"`
+		Description string `toml:"description"`
+		Color       string `toml:"color"`
+	} `toml:"Embeds"`
 }
