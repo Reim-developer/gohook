@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 )
 
@@ -29,7 +30,7 @@ func SendWebhook(URL *string, discord_webhook *DiscordWebhook) error {
 	defer response.Body.Close()
 
 	if response.StatusCode != 204 {
-		return err
+		return fmt.Errorf("unexpected response status: %d", response.StatusCode)
 	}
 
 	return nil
