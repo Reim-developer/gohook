@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"gohook/core"
 	"os"
+	"time"
 
 	"github.com/BurntSushi/toml"
 	"github.com/spf13/cobra"
@@ -16,6 +17,8 @@ type commandParameters struct {
 	verbose        bool
 	dryMode        bool
 	threads        int
+	loop           int
+	delay          int
 }
 
 func handerDryRun(dryMode bool, payload *core.DiscordWebhook) {
@@ -58,6 +61,21 @@ func handlerVerbose(verbose bool, payload *core.DiscordWebhook) {
 	}
 }
 
+func handlerLoopSend(url *string, payload *core.DiscordWebhook, params *commandParameters) {
+	if params.loop > 1 {
+		for i := range params.loop {
+			err := core.SendWebhook(url, payload)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "[CRITICAL] Send webhook failed at loop %d: %s\n", i, err)
+				continue
+			}
+			fmt.Fprintf(os.Stdout, "[OK] Send webhook success (%d) time(s), delay time: %d\n", i+1, params.delay)
+			time.Sleep(time.Duration(params.delay) * time.Second)
+		}
+		os.Exit(core.SUCCESS)
+	}
+}
+
 func handlerCommand(params *commandParameters) {
 	if !core.FileExists(params.tomlConfigPath) {
 
@@ -79,7 +97,9 @@ func handlerCommand(params *commandParameters) {
 	}
 
 	handerDryRun(params.dryMode, &payload)
+	handlerLoopSend(config.Webhook.URL, &payload, params)
 	err = core.SendWebhook(config.Webhook.URL, &payload)
+
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "[CRITICAL] Critical error: %s\n", err)
 		os.Exit(1)
@@ -96,6 +116,8 @@ func WebhookCommand() *cobra.Command {
 	var verbose bool
 	var dryMode bool
 	var threads int
+	var loop int
+	var delay int
 
 	var webhookCommand = &cobra.Command{
 		Use:   "wh-send <TOML Config>",
@@ -109,6 +131,8 @@ func WebhookCommand() *cobra.Command {
 				verbose:        verbose,
 				dryMode:        dryMode,
 				threads:        threads,
+				loop:           loop,
+				delay:          delay,
 			}
 
 			handlerCommand(&arguments)
@@ -117,7 +141,9 @@ func WebhookCommand() *cobra.Command {
 
 	webhookCommand.Flags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose mode")
 	webhookCommand.Flags().BoolVarP(&dryMode, "dry-run", "", false, "Enable dry-run mode")
-	webhookCommand.Flags().IntVarP(&threads, "thread", "t", 1, "Enable thread run")
+	webhookCommand.Flags().IntVarP(&threads, "thread", "", 1, "Enable thread run")
+	webhookCommand.Flags().IntVarP(&loop, "loop", "l", 1, "Enable loop run")
+	webhookCommand.Flags().IntVarP(&delay, "delay", "", 2, "Enable delay")
 
 	return webhookCommand
 
