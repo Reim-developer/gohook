@@ -4,7 +4,6 @@ package handle
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"gohook/core"
 	"os"
 	"time"
@@ -26,6 +25,7 @@ type CommandParameters struct {
 	Threads        int
 	Loop           int
 	Delay          int
+	Explicit       bool
 }
 
 func HandleDryRun(dryMode bool, payload *core.DiscordWebhook) {
@@ -39,12 +39,12 @@ func HandleDryRun(dryMode bool, payload *core.DiscordWebhook) {
 		err := encoder.Encode(payload)
 		if err != nil {
 
-			fmt.Fprintf(os.Stderr, "[CRITICAL] Could not decode JSON: %s\n", err)
+			core.CriticalShow("Could not decode JSON: %s", err)
 			os.Exit(core.JsonDecodeError)
 		}
 
-		fmt.Fprintln(os.Stdout, "[INFO] Running in Dry Mode:")
-		fmt.Fprintf(os.Stdout, "[INFO] Your webhook payload:\n%s\n", buffer.String())
+		core.InfoShow("Running in Dry Mode:")
+		core.InfoShow("Your webhook payload:\n%s", buffer.String())
 		os.Exit(core.Success)
 	}
 }
@@ -60,25 +60,37 @@ func HandleVerbose(verbose bool, payload *core.DiscordWebhook) {
 		err := encoder.Encode(payload)
 		if err != nil {
 
-			fmt.Fprintf(os.Stderr, "[CRITICAL] Could not decode JSON: %s\n", err)
+			core.CriticalShow("Could not decode JSON: %s", err)
 			os.Exit(core.JsonDecodeError)
 		}
 
-		fmt.Fprintf(os.Stdout, "[INFO] Your webhook payload:\n%s\n", buffer.String())
+		core.InfoShow("Your webhook payload:\n%s", buffer.String())
 	}
 }
 
 func HandleLoopSend(url *string, payload *core.DiscordWebhook, params *CommandParameters) {
 	if params.Loop > 1 {
+		var successCount = 0
+		var failedCount = 0
+
 		for i := range params.Loop {
 			err := core.SendWebhook(url, payload)
+
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "[CRITICAL] Send webhook failed at loop %d: %s\n", i, err)
+				core.CriticalShow("Send webhook failed (%d) time(s) %s\n", i, err)
+
+				failedCount += 1
+				time.Sleep(time.Duration(params.Delay) * time.Second)
 				continue
 			}
-			fmt.Fprintf(os.Stdout, "[OK] Send webhook success (%d) time(s), delay time: %d\n", i+1, params.Delay)
+			core.InfoShow("Send webhook success (%d) time(s), delay time: %d", i+1, params.Delay)
+
+			successCount += 1
 			time.Sleep(time.Duration(params.Delay) * time.Second)
 		}
+
+		core.InfoShow("Success count: %d time(s)", successCount)
+		core.InfoShow("Failed count: %d time(s)", failedCount)
 
 		HandleVerbose(params.Verbose, payload)
 		os.Exit(core.Success)
@@ -116,8 +128,8 @@ func assertMaxLen(max *maxLenCheck) {
 	var length = utf8.RuneCountInString(max.value)
 
 	if length > max.maxLen {
-		fmt.Fprintf(os.Stderr, "[CRITICAL] Embed [%s] too long (%d characters).\n", max.fieldName, length)
-		fmt.Fprintf(os.Stderr, "[HINT] Discord only allows up to %d character.\n", max.maxLen)
+		core.CriticalShow("Embed [%s] too long (%d characters).", max.fieldName, length)
+		core.InfoShow("Discord only allows up to %d characters.", max.maxLen)
 		os.Exit(max.exitCode)
 	}
 }
@@ -134,7 +146,7 @@ func GetEmbedsSetting(config *core.DiscordWebhookConfig) []core.Embed {
 
 		color, err := core.GetHexColor(embed.Color)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "[WARN] Invalid color %s, fallback to '0'\n", embed.Color)
+			core.InfoShow("Invalid color %s. Fallback to '0'\n", embed.Color)
 			color = 0
 		}
 
@@ -172,17 +184,46 @@ func GetEmbedsSetting(config *core.DiscordWebhookConfig) []core.Embed {
 	return embeds
 }
 
+func HandleWebhookSendOnce(config *core.DiscordWebhookConfig, payload *core.DiscordWebhook, params *CommandParameters) {
+	var err = core.SendWebhook(config.Webhook.URL, payload)
+
+	if err != nil {
+		core.CriticalShow("Critical error: %s\n", err)
+		os.Exit(core.WebhookSendFailed)
+	}
+
+	core.InfoShow("Successfully send webhook")
+
+	HandleVerbose(params.Verbose, payload)
+	os.Exit(core.Success)
+}
+
+func HandleExplicitMode(config *core.DiscordWebhookConfig, payload *core.DiscordWebhook, params *CommandParameters) {
+	var result, err = core.ExplicitSendWebhook(config.Webhook.URL, payload)
+	if err != nil {
+		core.CriticalShow("Could not send webhook with error: %s", err)
+		os.Exit(core.WebhookSendFailed)
+	}
+
+	core.InfoShow("Successfully send webhook")
+	core.InfoShow("Message ID: %s", result.MessageID)
+	core.InfoShow("Channel ID: %s", result.ChannelID)
+
+	HandleVerbose(params.Verbose, payload)
+	os.Exit(core.Success)
+}
+
 func HandleCommand(params *CommandParameters) {
 	if !core.FileExists(params.TomlConfigPath) {
 
-		fmt.Fprintf(os.Stderr, "[CRITICAL] File %s does not exists.\n", params.TomlConfigPath)
+		core.CriticalShow("File %s does not exists.", params.TomlConfigPath)
 		os.Exit(core.FileNotFoundError)
 	}
 
 	var config core.DiscordWebhookConfig
 	_, err := toml.DecodeFile(params.TomlConfigPath, &config)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "[CRITICAL] Could not decode your TOML file: %s\n", err)
+		core.CriticalShow("Could not decode your TOML file: %s\n", err)
 		os.Exit(core.TomlDecodeError)
 	}
 
@@ -195,16 +236,7 @@ func HandleCommand(params *CommandParameters) {
 	}
 
 	HandleDryRun(params.DryMode, &payload)
+	HandleExplicitMode(&config, &payload, params)
 	HandleLoopSend(config.Webhook.URL, &payload, params)
-	err = core.SendWebhook(config.Webhook.URL, &payload)
-
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "[CRITICAL] Critical error: %s\n", err)
-		os.Exit(1)
-	}
-
-	fmt.Fprintln(os.Stdout, "[OK] Successfully send webhook")
-
-	HandleVerbose(params.Verbose, &payload)
-	os.Exit(core.Success)
+	HandleWebhookSendOnce(&config, &payload, params)
 }
