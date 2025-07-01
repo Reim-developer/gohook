@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -36,4 +37,12 @@ func FileExists(path string) bool {
 
 func IsNonEmpty(str string) bool {
 	return strings.TrimSpace(str) != ""
+}
+
+func InfoShow(format string, a ...any) {
+	fmt.Fprintf(os.Stdout, "[INFO] "+format+"\n", a...)
+}
+
+func CriticalShow(format string, a ...any) {
+	fmt.Fprintf(os.Stderr, "[CRITICAL] "+format+"\n", a...)
 }
