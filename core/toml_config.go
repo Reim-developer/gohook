@@ -1,6 +1,6 @@
 package core
 
-type Config struct {
+type DiscordWebhookConfig struct {
 	Webhook struct {
 		URL  *string  `toml:"url"`
 		URLs []string `toml:"urls"`
@@ -15,18 +15,23 @@ type Config struct {
 		Content string `toml:"content"`
 	} `toml:"Message"`
 
-	Embeds []struct {
-		Title       string `toml:"title"`
-		Description string `toml:"description"`
-		Color       string `toml:"color"`
-		Footer      struct {
-			Text string `toml:"text"`
-		} `toml:"footer"`
-		Image struct {
-			URL string `toml:"url"`
-		} `toml:"image"`
-		Thumbnail struct {
-			URL string `toml:"url"`
-		} `toml:"thumbnail"`
-	} `toml:"Embeds"`
+	Embeds []DiscordEmbedConfig `toml:"Embeds"`
+}
+
+type DiscordEmbedConfig struct {
+	Title       string `toml:"title"`
+	Description string `toml:"description"`
+	Color       string `toml:"color"`
+
+	Footer struct {
+		Text string `toml:"text"`
+	} `toml:"footer"`
+
+	Image struct {
+		URL string `toml:"url"`
+	} `toml:"image"`
+
+	Thumbnail struct {
+		URL string `toml:"url"`
+	} `toml:"thumbnail"`
 }
