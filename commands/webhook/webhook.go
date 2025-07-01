@@ -1,7 +1,7 @@
 package webhook
 
 import (
-	"gohook/commands/handler"
+	"gohook/commands/handle"
 
 	"github.com/spf13/cobra"
 )
@@ -21,7 +21,7 @@ func WebhookCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			tomlConfigPath = args[0]
 
-			var arguments = handler.CommandParameters{
+			var arguments = handle.CommandParameters{
 				TomlConfigPath: tomlConfigPath,
 				Verbose:        verbose,
 				DryMode:        dryMode,
@@ -30,7 +30,7 @@ func WebhookCommand() *cobra.Command {
 				Delay:          delay,
 			}
 
-			handler.HandlerCommand(&arguments)
+			handle.HandleCommand(&arguments)
 		},
 	}
 
