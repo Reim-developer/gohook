@@ -2,6 +2,7 @@ package core
 
 import (
 	"os"
+	"strings"
 
 	"github.com/lucasb-eyer/go-colorful"
 )
@@ -31,4 +32,8 @@ func FileExists(path string) bool {
 	}
 
 	return true
+}
+
+func IsNonEmpty(str string) bool {
+	return strings.TrimSpace(str) != ""
 }
