@@ -1,8 +1,12 @@
 package core
 
 const (
-	SUCCESS = iota
-	FILE_NOT_FOUND
-	TOML_DECODE_ERROR
-	JSON_DECODE_ERROR
+	Success = iota
+
+	FileNotFoundError
+	TomlDecodeError
+	JsonDecodeError
+	DescriptionMaxLenError
+	TitleMaxLenError
+	FooterMaxLenError
 )
