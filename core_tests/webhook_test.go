@@ -10,7 +10,7 @@ import (
 )
 
 func TestDecodeToml(t *testing.T) {
-	var config core.Config
+	var config core.DiscordWebhookConfig
 	_, err := toml.DecodeFile("settings_test.toml", &config)
 
 	if err != nil {
