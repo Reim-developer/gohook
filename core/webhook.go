@@ -8,6 +8,30 @@ import (
 	"net/http"
 )
 
+// Embed struct to Discord Webhook.
+// Example JSON:
+//
+//	{
+//	  "content": "Hello World",
+//	  "username": "Kaxtr",
+//	  "avatar_url": "https://example.com/image.png",
+//	  "embeds": [
+//	    {
+//	      "title": "Test",
+//	      "description": "Test Description",
+//	      "color": 16777215,
+//	      "footer": {
+//	        "text": "test"
+//	      },
+//	      "image": {
+//	        "url": "https://example.com/image.png"
+//	      },
+//	      "thumbnail": {
+//	        "url": "https://example.com/image.png"
+//	      }
+//	    }
+//	  ]
+//	}
 type Embed struct {
 	Title       string          `json:"title,omitempty"`
 	Description string          `json:"description,omitempty"`
@@ -36,13 +60,42 @@ type DiscordWebhook struct {
 	Embeds   []Embed `json:"embeds,omitempty"`
 }
 
-func SendWebhook(URL *string, discord_webhook *DiscordWebhook) error {
-	payload, _ := json.Marshal(discord_webhook)
+type WebhookResponse struct {
+	MessageID string `json:"id"`
+	ChannelID string `json:"channel_id"`
+}
 
+func ExplicitSendWebhook(URL *string, webhook *DiscordWebhook) (*WebhookResponse, error) {
+	if URL == nil || *URL == "" {
+		return nil, errors.New("invalid Webhook URL. Please make sure your webhook URL in TOML setting is valid")
+	}
+
+	payload, marshalErr := json.Marshal(webhook)
+	if marshalErr != nil {
+		return nil, marshalErr
+	}
+
+	response, response_err := http.Post(*URL+"?wait=true", "application/json", bytes.NewBuffer(payload))
+	if response_err != nil {
+		return nil, response_err
+	}
+	defer response.Body.Close()
+
+	var webhookResponse WebhookResponse
+	decodeError := json.NewDecoder(response.Body).Decode(&webhookResponse)
+	if decodeError != nil {
+		return nil, decodeError
+	}
+
+	return &webhookResponse, nil
+}
+
+func SendWebhook(URL *string, discord_webhook *DiscordWebhook) error {
 	if URL == nil || *URL == "" {
 		return errors.New("invalid Webhook URL. Please make sure your webhook URL in TOML setting is valid")
 	}
 
+	payload, _ := json.Marshal(discord_webhook)
 	response, err := http.Post(*URL, "application/json", bytes.NewBuffer(payload))
 
 	if err != nil {
