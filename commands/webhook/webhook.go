@@ -13,6 +13,7 @@ func WebhookCommand() *cobra.Command {
 	var threads int
 	var loop int
 	var delay int
+	var explicit bool
 
 	var webhookCommand = &cobra.Command{
 		Use:   "wh-send <TOML Config>",
@@ -39,6 +40,7 @@ func WebhookCommand() *cobra.Command {
 	webhookCommand.Flags().IntVarP(&threads, "thread", "", 1, "Enable thread run")
 	webhookCommand.Flags().IntVarP(&loop, "loop", "l", 1, "Enable loop run")
 	webhookCommand.Flags().IntVarP(&delay, "delay", "", 2, "Enable delay")
+	webhookCommand.Flags().BoolVarP(&explicit, "explicit", "e", false, "Enable explicit mode")
 
 	return webhookCommand
 
