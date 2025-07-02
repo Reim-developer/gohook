@@ -20,6 +20,7 @@ const (
 
 type CommandParameters struct {
 	TomlConfigPath string
+	EnvWebhookUrl  string
 	Verbose        bool
 	DryMode        bool
 	Threads        int
@@ -68,13 +69,24 @@ func HandleVerbose(verbose bool, payload *core.DiscordWebhook) {
 	}
 }
 
-func HandleLoopSend(url *string, payload *core.DiscordWebhook, params *CommandParameters) {
+func HandleLoopSend(config *core.DiscordWebhookConfig, payload *core.DiscordWebhook, params *CommandParameters) {
 	if params.Loop > 1 {
 		var successCount = 0
 		var failedCount = 0
+		var webhookEnv string
+		var useEnv = false
+
+		if val := os.Getenv(params.EnvWebhookUrl); val != "" {
+			webhookEnv = val
+			useEnv = true
+		} else {
+			webhookEnv = *config.Webhook.URL
+			useEnv = false
+		}
 
 		for i := range params.Loop {
-			err := core.SendWebhook(url, payload)
+
+			err := core.SendWebhook(&webhookEnv, payload)
 
 			if err != nil {
 				core.CriticalShow("Send webhook failed (%d) time(s) %s\n", i, err)
@@ -91,6 +103,9 @@ func HandleLoopSend(url *string, payload *core.DiscordWebhook, params *CommandPa
 
 		core.InfoShow("Success count: %d time(s)", successCount)
 		core.InfoShow("Failed count: %d time(s)", failedCount)
+		if useEnv {
+			core.InfoShow("This action use environment: %s", params.EnvWebhookUrl)
+		}
 
 		HandleVerbose(params.Verbose, payload)
 		os.Exit(core.Success)
@@ -185,7 +200,17 @@ func GetEmbedsSetting(config *core.DiscordWebhookConfig) []core.Embed {
 }
 
 func HandleWebhookSendOnce(config *core.DiscordWebhookConfig, payload *core.DiscordWebhook, params *CommandParameters) {
-	var err = core.SendWebhook(config.Webhook.URL, payload)
+	var webhookEnv string
+	var useEnv = false
+	if val := os.Getenv(params.EnvWebhookUrl); val != "" {
+		webhookEnv = val
+		useEnv = true
+	} else {
+		webhookEnv = *config.Webhook.URL
+		useEnv = false
+	}
+
+	var err = core.SendWebhook(&webhookEnv, payload)
 
 	if err != nil {
 		core.CriticalShow("Critical error: %s\n", err)
@@ -193,24 +218,44 @@ func HandleWebhookSendOnce(config *core.DiscordWebhookConfig, payload *core.Disc
 	}
 
 	core.InfoShow("Successfully send webhook")
+	if useEnv {
+		core.InfoShow("This action use environment: %s", params.EnvWebhookUrl)
+	}
 
 	HandleVerbose(params.Verbose, payload)
 	os.Exit(core.Success)
 }
 
 func HandleExplicitMode(config *core.DiscordWebhookConfig, payload *core.DiscordWebhook, params *CommandParameters) {
-	var result, err = core.ExplicitSendWebhook(config.Webhook.URL, payload)
-	if err != nil {
-		core.CriticalShow("Could not send webhook with error: %s", err)
-		os.Exit(core.WebhookSendFailed)
+	if params.Explicit {
+		var webhookEnv string
+		var useEnv = false
+
+		if val := os.Getenv(params.EnvWebhookUrl); val != "" {
+			webhookEnv = val
+			useEnv = true
+		} else {
+			webhookEnv = *config.Webhook.URL
+			useEnv = false
+		}
+
+		var result, err = core.ExplicitSendWebhook(&webhookEnv, payload)
+		if err != nil {
+			core.CriticalShow("Could not send webhook with error: %s", err)
+			os.Exit(core.WebhookSendFailed)
+		}
+
+		core.InfoShow("Use Explicit Mode:")
+		core.InfoShow("Successfully send webhook")
+		core.InfoShow("Message ID: %s", result.MessageID)
+		core.InfoShow("Channel ID: %s", result.ChannelID)
+		if useEnv {
+			core.InfoShow("This action use environment: %s", params.EnvWebhookUrl)
+		}
+
+		HandleVerbose(params.Verbose, payload)
+		os.Exit(core.Success)
 	}
-
-	core.InfoShow("Successfully send webhook")
-	core.InfoShow("Message ID: %s", result.MessageID)
-	core.InfoShow("Channel ID: %s", result.ChannelID)
-
-	HandleVerbose(params.Verbose, payload)
-	os.Exit(core.Success)
 }
 
 func HandleCommand(params *CommandParameters) {
@@ -237,6 +282,6 @@ func HandleCommand(params *CommandParameters) {
 
 	HandleDryRun(params.DryMode, &payload)
 	HandleExplicitMode(&config, &payload, params)
-	HandleLoopSend(config.Webhook.URL, &payload, params)
+	HandleLoopSend(&config, &payload, params)
 	HandleWebhookSendOnce(&config, &payload, params)
 }
