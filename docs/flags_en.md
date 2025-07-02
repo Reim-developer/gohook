@@ -4,14 +4,15 @@
 `wh-send`
 * **Description:** Send content or embed to Discord webhook via TOML configurations.
 
-| Flag         | Type | Default | Description                                                |
-| ------------ | ---- | ------- | ---------------------------------------------------------- |
-| `--verbose`  | bool | false   | Show payload after sending. Optional.                      |
-| `--dry-run`  | bool | false   | Do not send webhook, just print payload.                   |
-| `--loop`     | int  | `1`     | Send webhook multiple times.                               |
-| `--delay`    | int  | `2`     | Delay between each webhook in loop (seconds).              |
-| `--threads`  | int  | `1`     | Future use. Not yet implemented.                           |
-| `--explicit` | bool | false   | Print full Discord response (message ID, channel ID, etc). |
+| Flag            | Type   | Default | Description                                                |
+| --------------- | ------ | ------- | ---------------------------------------------------------- |
+| `--verbose`     | bool   | false   | Show payload after sending. Optional.                      |
+| `--dry-run`     | bool   | false   | Do not send webhook, just print payload.                   |
+| `--loop`        | int    | `1`     | Send webhook multiple times.                               |
+| `--delay`       | int    | `2`     | Delay between each webhook in loop (seconds).              |
+| `--threads`     | int    | `1`     | Future use. Not yet implemented.                           |
+| `--explicit`    | bool   | false   | Print full Discord response (message ID, channel ID, etc). |
+| `--use-env-url` | string | ""      | Use environtment variable instead of `url` setting         |
 
 ## Examples
 **Send webhook once:**
