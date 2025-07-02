@@ -1,7 +1,4 @@
 #!/usr/bin/bash
-
-
-
 function tool_check() {
     if ! command -v go > /dev/null; then 
         echo "Could not find Go in your operating system. Aborting."
@@ -24,7 +21,7 @@ function build() {
     local OS_ARCH="amd64"
     local DIST="dist"
     local ZIP_DIST="$DIST/zip"
-
+    local CHECKSUM_FILE="$ZIP_DIST/checksum.txt"
 
     if [ ! -d "$DIST" ]; then 
         mkdir -p "$DIST"
@@ -32,7 +29,9 @@ function build() {
 
     if [ ! -d "$ZIP_DIST" ]; then
         mkdir -p "$ZIP_DIST"
-    fi 
+    fi
+
+    : > "$CHECKSUM_FILE"
 
     for OS in "${OS_LIST[@]}"; do 
         local OUTPUT="gohook-${OS}-${OS_ARCH}"
@@ -45,13 +44,17 @@ function build() {
 
         GOOS=$OS GOARCH=$OS_ARCH go build -o "$DIST/$OUTPUT"
         
+        local ARCHIVE_NAME=""
         if [[ "$OS" == "windows" ]];then
-            zip -j "$ZIP_DIST/GoHook_Windows.zip" "$DIST/$OUTPUT"
+            ARCHIVE_NAME="GoHook_Windows.zip"
+            zip -j "$ZIP_DIST/$ARCHIVE_NAME" "$DIST/$OUTPUT"
 
         else
+            ARCHIVE_NAME="GoHook_$OS.tar.gz"
             tar -czvf "$ZIP_DIST/GoHook_$OS.tar.gz" "$DIST/$OUTPUT"
         
-        fi 
+        fi
+        sha256sum "$ZIP_DIST/$ARCHIVE_NAME" >> "$CHECKSUM_FILE"
     done
 
     echo "Build success."
