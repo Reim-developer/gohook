@@ -15,6 +15,7 @@ func WebhookCommand() *cobra.Command {
 	var loop int
 	var delay int
 	var explicit bool
+	var toJson bool
 
 	var webhookCommand = &cobra.Command{
 		Use:   "wh-send <TOML Config>",
@@ -32,6 +33,7 @@ func WebhookCommand() *cobra.Command {
 				Delay:          delay,
 				EnvWebhookUrl:  envUrl,
 				Explicit:       explicit,
+				ToJson:         toJson,
 			}
 
 			handle.HandleCommand(&arguments)
@@ -45,6 +47,7 @@ func WebhookCommand() *cobra.Command {
 	webhookCommand.Flags().IntVarP(&delay, "delay", "", 2, "Enable delay")
 	webhookCommand.Flags().BoolVarP(&explicit, "explicit", "e", false, "Enable explicit mode")
 	webhookCommand.Flags().StringVarP(&envUrl, "use-env-url", "", "", "Enable environment support")
+	webhookCommand.Flags().BoolVarP(&toJson, "to-json", "", false, "Export payload to JSON")
 
 	return webhookCommand
 
