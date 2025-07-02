@@ -16,6 +16,7 @@ function merge_all() {
     git merge master stable
     git push origin stable
 
+    git swich dev
 }
 
 function main() {
