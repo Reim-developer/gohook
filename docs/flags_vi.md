@@ -2,7 +2,7 @@
 
 ## Lệnh
 `wh-send`
-* **Description:** Gửi nội dung đã được thiết lập trước trong `settings.toml` hoặc bất kì file cấu hình TOML nào sẵn có miễn là đúng format.
+* **Mô tả:** Gửi nội dung đã được thiết lập trước trong `settings.toml` hoặc bất kì file cấu hình TOML nào sẵn có miễn là đúng format.
 
 | Flag         | Type | Default | Description                                                  |
 | ------------ | ---- | ------- | ------------------------------------------------------------ |
