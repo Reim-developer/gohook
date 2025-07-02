@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/lucasb-eyer/go-colorful"
 )
@@ -33,6 +34,25 @@ func FileExists(path string) bool {
 	}
 
 	return true
+}
+
+func GetTimeNow() string {
+	const TimeFormat string = "2006_01_02_15_04"
+	var timeNow = time.Now()
+	var timeStamp = timeNow.Format(TimeFormat)
+
+	return timeStamp
+}
+
+func WriteTo(filePath string, content []byte) error {
+	const FilePermission = os.FileMode(0644)
+
+	err := os.WriteFile(filePath, content, FilePermission)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func IsNonEmpty(str string) bool {
