@@ -29,6 +29,10 @@ gohook wh-send settings.toml --dry-run
 ```bash
 gohook wh-send settings.toml --loop 5 --delay 3
 ```
+**Gửi webhook với biến môi trường:**
+```bash
+WEBHOOK_URL=https://discord.com/api/webhooks/abc/xyz gohook wh-send settings.toml --use-env-url WEBHOOK_URL
+```
 
 **Nếu bạn cần mẫu cấu hình TOML, hãy xem ở:**
 * https://github.com/Reim-developer/gohook/tree/stable/examples
