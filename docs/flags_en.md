@@ -30,5 +30,10 @@ gohook wh-send settings.toml --dry-run
 gohook wh-send settings.toml --loop 5 --delay 3
 ```
 
+**Send webhook with environment variable:**
+```bash
+WEBHOOK_URL=https://discord.com/api/webhooks/abc/xyz gohook wh-send settings.toml --use-env-url WEBHOOK_URL
+```
+
 **For more settings examples, please visit:**
 * https://github.com/Reim-developer/gohook/tree/stable/examples
