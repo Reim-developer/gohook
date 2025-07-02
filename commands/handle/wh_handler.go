@@ -127,7 +127,7 @@ func copyOptionalEmbedFields(src *core.DiscordEmbedConfig, dst *core.Embed) {
 
 	if core.IsNonEmpty(src.Thumbnail.URL) {
 		dst.Thumbnail = &core.EmbedThumbnail{
-			URL: src.Image.URL,
+			URL: src.Thumbnail.URL,
 		}
 	}
 }
