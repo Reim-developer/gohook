@@ -8,6 +8,7 @@ import (
 
 func WebhookCommand() *cobra.Command {
 	var tomlConfigPath string
+	var envUrl string
 	var verbose bool
 	var dryMode bool
 	var threads int
@@ -29,6 +30,8 @@ func WebhookCommand() *cobra.Command {
 				Threads:        threads,
 				Loop:           loop,
 				Delay:          delay,
+				EnvWebhookUrl:  envUrl,
+				Explicit:       explicit,
 			}
 
 			handle.HandleCommand(&arguments)
@@ -41,6 +44,7 @@ func WebhookCommand() *cobra.Command {
 	webhookCommand.Flags().IntVarP(&loop, "loop", "l", 1, "Enable loop run")
 	webhookCommand.Flags().IntVarP(&delay, "delay", "", 2, "Enable delay")
 	webhookCommand.Flags().BoolVarP(&explicit, "explicit", "e", false, "Enable explicit mode")
+	webhookCommand.Flags().StringVarP(&envUrl, "use-env-url", "", "", "Enable environment support")
 
 	return webhookCommand
 
