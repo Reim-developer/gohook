@@ -1,0 +1,33 @@
+# Webhook URL is required.
+[Webhook]
+# For more information, how to get Discord webhook URL, please visit:
+# https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks
+url = "My Discord Webhook URL"
+
+# Base information setup for webhook.
+[Base]
+username = ""   # Your webhook username. Leave blank for default username.
+avatar_url = "" # Your webhook avatar. Leave blank for default avatar.
+
+# Webhook with beautiful embed.
+[[Embeds]]
+title = "" # Your webhook title. Optional.
+description = "example description" # Your webhook description. For embed, it's required.
+
+# Your webhook color. HEX format required with '#'
+# If you want pick something beautiful color, visit:
+# https://g.co/kgs/JebJDVM
+color = "#ffffff"
+
+# Advanced embed configuration:
+[Embeds.footer]
+# Your footer text. Optional
+text = "my awesome embed footer"
+
+[Embeds.image]
+# Your embed image. Optional
+url = "https://example.com/image.png"
+
+[Embeds.thumbnail]
+# Your embed thumbnail. Optional
+url = "https://example.com/thumbnail.png"
