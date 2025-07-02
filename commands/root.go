@@ -2,6 +2,7 @@ package commands
 
 import (
 	"gohook/commands/webhook"
+	"gohook/core"
 	"log"
 	"os"
 
@@ -19,6 +20,6 @@ func Execute() {
 
 	if err := rootCommand.Execute(); err != nil {
 		log.Println(err)
-		os.Exit(1)
+		os.Exit(core.CommandRunFailed)
 	}
 }
