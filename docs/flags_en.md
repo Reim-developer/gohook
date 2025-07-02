@@ -1,0 +1,33 @@
+# GoHook CLI Flags
+
+## Command:
+`wh-send`
+* **Description:** Send content or embed to Discord webhook via TOML configurations.
+
+| Flag         | Type | Default | Description                                                |
+| ------------ | ---- | ------- | ---------------------------------------------------------- |
+| `--verbose`  | bool | false   | Show payload after sending. Optional.                      |
+| `--dry-run`  | bool | false   | Do not send webhook, just print payload.                   |
+| `--loop`     | int  | `1`     | Send webhook multiple times.                               |
+| `--delay`    | int  | `2`     | Delay between each webhook in loop (seconds).              |
+| `--threads`  | int  | `1`     | Future use. Not yet implemented.                           |
+| `--explicit` | bool | false   | Print full Discord response (message ID, channel ID, etc). |
+
+## Examples
+**Send webhook once:**
+```bash
+gohook wh-send settings.toml
+```
+
+**Dry run, don't send any:**
+```bash
+gohook wh-send settings.toml --dry-run
+```
+
+**Loop 5 times with 3s delay:**
+```bash
+gohook wh-send settings.toml --loop 5 --delay 3
+```
+
+**For more settings examples, please visit:**
+* https://github.com/Reim-developer/gohook/tree/stable/examples
