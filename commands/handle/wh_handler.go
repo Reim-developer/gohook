@@ -4,6 +4,7 @@ package handle
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"gohook/core"
 	"os"
 	"time"
@@ -27,10 +28,39 @@ type CommandParameters struct {
 	Loop           int
 	Delay          int
 	Explicit       bool
+	ToJson         bool
 }
 
-func HandleDryRun(dryMode bool, payload *core.DiscordWebhook) {
-	if dryMode {
+func HandleExportToJson(params *CommandParameters, payload *core.DiscordWebhook) {
+	if params.ToJson {
+		var buffer bytes.Buffer
+		var encoder = json.NewEncoder(&buffer)
+
+		encoder.SetEscapeHTML(false)
+		encoder.SetIndent("", " ")
+
+		err := encoder.Encode(payload)
+		if err != nil {
+
+			core.CriticalShow("Could not decode JSON: %s", err)
+			os.Exit(core.JsonDecodeError)
+		}
+
+		var timeNow = core.GetTimeNow()
+		var filePath = fmt.Sprintf("%s.json", timeNow)
+		var contentBytes = buffer.Bytes()
+
+		write_err := core.WriteTo(filePath, contentBytes)
+		if write_err != nil {
+			core.CriticalShow("Export to JSON FAILED with error: %s", write_err)
+			os.Exit(core.WriteJsonFailed)
+		}
+		core.InfoShow("Successfully export your payload to: %s", filePath)
+	}
+}
+
+func HandleDryRun(params *CommandParameters, payload *core.DiscordWebhook) {
+	if params.DryMode {
 		var buffer bytes.Buffer
 		var encoder = json.NewEncoder(&buffer)
 
@@ -46,6 +76,8 @@ func HandleDryRun(dryMode bool, payload *core.DiscordWebhook) {
 
 		core.InfoShow("Running in Dry Mode:")
 		core.InfoShow("Your webhook payload:\n%s", buffer.String())
+
+		HandleExportToJson(params, payload)
 		os.Exit(core.Success)
 	}
 }
@@ -107,6 +139,7 @@ func HandleLoopSend(config *core.DiscordWebhookConfig, payload *core.DiscordWebh
 			core.InfoShow("This action use environment: %s", params.EnvWebhookUrl)
 		}
 
+		HandleExportToJson(params, payload)
 		HandleVerbose(params.Verbose, payload)
 		os.Exit(core.Success)
 	}
@@ -222,6 +255,7 @@ func HandleWebhookSendOnce(config *core.DiscordWebhookConfig, payload *core.Disc
 		core.InfoShow("This action use environment: %s", params.EnvWebhookUrl)
 	}
 
+	HandleExportToJson(params, payload)
 	HandleVerbose(params.Verbose, payload)
 	os.Exit(core.Success)
 }
@@ -253,6 +287,7 @@ func HandleExplicitMode(config *core.DiscordWebhookConfig, payload *core.Discord
 			core.InfoShow("This action use environment: %s", params.EnvWebhookUrl)
 		}
 
+		HandleExportToJson(params, payload)
 		HandleVerbose(params.Verbose, payload)
 		os.Exit(core.Success)
 	}
@@ -273,14 +308,14 @@ func HandleCommand(params *CommandParameters) {
 	}
 
 	var embeds = GetEmbedsSetting(&config)
-	payload := core.DiscordWebhook{
+	var payload = core.DiscordWebhook{
 		Content:  config.Message.Content,
 		Username: config.Base.Username,
 		Avatar:   config.Base.Avatar,
 		Embeds:   embeds,
 	}
 
-	HandleDryRun(params.DryMode, &payload)
+	HandleDryRun(params, &payload)
 	HandleExplicitMode(&config, &payload, params)
 	HandleLoopSend(&config, &payload, params)
 	HandleWebhookSendOnce(&config, &payload, params)
