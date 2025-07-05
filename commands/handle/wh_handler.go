@@ -2,21 +2,12 @@
 package handle
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
+	whsendflags "gohook/commands/handle/wh_send_flags"
+	embedsmanager "gohook/commands/handle/wh_send_flags/embeds_manager"
 	"gohook/core"
 	"os"
-	"time"
-	"unicode/utf8"
 
 	"github.com/BurntSushi/toml"
-)
-
-const (
-	EmbedTitleMaxLen       = 256
-	EmbedDescriptionMaxLen = 2048
-	EmbedFooterMaxLen      = 2048
 )
 
 type CommandParameters struct {
@@ -29,268 +20,6 @@ type CommandParameters struct {
 	Delay          int
 	Explicit       bool
 	ToJson         bool
-}
-
-func HandleExportToJson(params *CommandParameters, payload *core.DiscordWebhook) {
-	if params.ToJson {
-		var buffer bytes.Buffer
-		var encoder = json.NewEncoder(&buffer)
-
-		encoder.SetEscapeHTML(false)
-		encoder.SetIndent("", " ")
-
-		err := encoder.Encode(payload)
-		if err != nil {
-
-			core.CriticalShow("Could not decode JSON: %s", err)
-			os.Exit(core.JsonDecodeError)
-		}
-
-		var timeNow = core.GetTimeNow()
-		var filePath = fmt.Sprintf("%s.json", timeNow)
-		var contentBytes = buffer.Bytes()
-
-		write_err := core.WriteTo(filePath, contentBytes)
-		if write_err != nil {
-			core.CriticalShow("Export to JSON FAILED with error: %s", write_err)
-			os.Exit(core.WriteJsonFailed)
-		}
-		core.InfoShow("Successfully export your payload to: %s", filePath)
-	}
-}
-
-func HandleDryRun(params *CommandParameters, payload *core.DiscordWebhook) {
-	if params.DryMode {
-		var buffer bytes.Buffer
-		var encoder = json.NewEncoder(&buffer)
-
-		encoder.SetEscapeHTML(false)
-		encoder.SetIndent("", " ")
-
-		err := encoder.Encode(payload)
-		if err != nil {
-
-			core.CriticalShow("Could not decode JSON: %s", err)
-			os.Exit(core.JsonDecodeError)
-		}
-
-		core.InfoShow("Running in Dry Mode:")
-		core.InfoShow("Your webhook payload:\n%s", buffer.String())
-
-		HandleExportToJson(params, payload)
-		os.Exit(core.Success)
-	}
-}
-
-func HandleVerbose(verbose bool, payload *core.DiscordWebhook) {
-	if verbose {
-		var buffer bytes.Buffer
-		var encoder = json.NewEncoder(&buffer)
-
-		encoder.SetEscapeHTML(false)
-		encoder.SetIndent("", " ")
-
-		err := encoder.Encode(payload)
-		if err != nil {
-
-			core.CriticalShow("Could not decode JSON: %s", err)
-			os.Exit(core.JsonDecodeError)
-		}
-
-		core.InfoShow("Your webhook payload:\n%s", buffer.String())
-	}
-}
-
-func HandleLoopSend(config *core.DiscordWebhookConfig, payload *core.DiscordWebhook, params *CommandParameters) {
-	if params.Loop > 1 {
-		var successCount = 0
-		var failedCount = 0
-		var webhookEnv string
-		var useEnv = false
-
-		if val := os.Getenv(params.EnvWebhookUrl); val != "" {
-			webhookEnv = val
-			useEnv = true
-		} else {
-			webhookEnv = *config.Webhook.URL
-			useEnv = false
-		}
-
-		for i := range params.Loop {
-
-			err := core.SendWebhook(&webhookEnv, payload)
-
-			if err != nil {
-				core.CriticalShow("Send webhook failed (%d) time(s) %s\n", i, err)
-
-				failedCount += 1
-				time.Sleep(time.Duration(params.Delay) * time.Second)
-				continue
-			}
-			core.InfoShow("Send webhook success (%d) time(s), delay time: %d", i+1, params.Delay)
-
-			successCount += 1
-			time.Sleep(time.Duration(params.Delay) * time.Second)
-		}
-
-		core.InfoShow("Success count: %d time(s)", successCount)
-		core.InfoShow("Failed count: %d time(s)", failedCount)
-		if useEnv {
-			core.InfoShow("This action use environment: %s", params.EnvWebhookUrl)
-		}
-
-		HandleExportToJson(params, payload)
-		HandleVerbose(params.Verbose, payload)
-		os.Exit(core.Success)
-	}
-}
-
-func copyOptionalEmbedFields(src *core.DiscordEmbedConfig, dst *core.Embed) {
-	if core.IsNonEmpty(src.Footer.Text) {
-		dst.Footer = &core.EmbedFooter{
-			Text: src.Footer.Text,
-		}
-	}
-
-	if core.IsNonEmpty(src.Image.URL) {
-		dst.Image = &core.EmbedImage{
-			URL: src.Image.URL,
-		}
-	}
-
-	if core.IsNonEmpty(src.Thumbnail.URL) {
-		dst.Thumbnail = &core.EmbedThumbnail{
-			URL: src.Thumbnail.URL,
-		}
-	}
-}
-
-type maxLenCheck struct {
-	fieldName string
-	value     string
-	maxLen    int
-	exitCode  int
-}
-
-func assertMaxLen(max *maxLenCheck) {
-	var length = utf8.RuneCountInString(max.value)
-
-	if length > max.maxLen {
-		core.CriticalShow("Embed [%s] too long (%d characters).", max.fieldName, length)
-		core.InfoShow("Discord only allows up to %d characters.", max.maxLen)
-		os.Exit(max.exitCode)
-	}
-}
-
-func GetEmbedsSetting(config *core.DiscordWebhookConfig) []core.Embed {
-	embeds := make([]core.Embed, 0, len(config.Embeds))
-
-	for index := range config.Embeds {
-		var embed = &config.Embeds[index]
-
-		if embed.Title == "" && embed.Description == "" {
-			continue
-		}
-
-		color, err := core.GetHexColor(embed.Color)
-		if err != nil {
-			core.InfoShow("Invalid color %s. Fallback to '0'\n", embed.Color)
-			color = 0
-		}
-
-		assertMaxLen(&maxLenCheck{
-			fieldName: "Descripton",
-			value:     embed.Description,
-			maxLen:    EmbedDescriptionMaxLen,
-			exitCode:  core.DescriptionMaxLenError,
-		})
-
-		assertMaxLen(&maxLenCheck{
-			fieldName: "Title",
-			value:     embed.Title,
-			maxLen:    EmbedTitleMaxLen,
-			exitCode:  core.TitleMaxLenError,
-		})
-
-		assertMaxLen(&maxLenCheck{
-			fieldName: "Footer",
-			value:     embed.Footer.Text,
-			maxLen:    EmbedFooterMaxLen,
-			exitCode:  core.FooterMaxLenError,
-		})
-
-		var newEmbed = core.Embed{
-			Title:       embed.Title,
-			Description: embed.Description,
-			Color:       color,
-		}
-
-		copyOptionalEmbedFields(embed, &newEmbed)
-		embeds = append(embeds, newEmbed)
-	}
-
-	return embeds
-}
-
-func HandleWebhookSendOnce(config *core.DiscordWebhookConfig, payload *core.DiscordWebhook, params *CommandParameters) {
-	var webhookEnv string
-	var useEnv = false
-	if val := os.Getenv(params.EnvWebhookUrl); val != "" {
-		webhookEnv = val
-		useEnv = true
-	} else {
-		webhookEnv = *config.Webhook.URL
-		useEnv = false
-	}
-
-	var err = core.SendWebhook(&webhookEnv, payload)
-
-	if err != nil {
-		core.CriticalShow("Critical error: %s\n", err)
-		os.Exit(core.WebhookSendFailed)
-	}
-
-	core.InfoShow("Successfully send webhook")
-	if useEnv {
-		core.InfoShow("This action use environment: %s", params.EnvWebhookUrl)
-	}
-
-	HandleExportToJson(params, payload)
-	HandleVerbose(params.Verbose, payload)
-	os.Exit(core.Success)
-}
-
-func HandleExplicitMode(config *core.DiscordWebhookConfig, payload *core.DiscordWebhook, params *CommandParameters) {
-	if params.Explicit {
-		var webhookEnv string
-		var useEnv = false
-
-		if val := os.Getenv(params.EnvWebhookUrl); val != "" {
-			webhookEnv = val
-			useEnv = true
-		} else {
-			webhookEnv = *config.Webhook.URL
-			useEnv = false
-		}
-
-		var result, err = core.ExplicitSendWebhook(&webhookEnv, payload)
-		if err != nil {
-			core.CriticalShow("Could not send webhook with error: %s", err)
-			os.Exit(core.WebhookSendFailed)
-		}
-
-		core.InfoShow("Use Explicit Mode:")
-		core.InfoShow("Successfully send webhook")
-		core.InfoShow("Message ID: %s", result.MessageID)
-		core.InfoShow("Channel ID: %s", result.ChannelID)
-		if useEnv {
-			core.InfoShow("This action use environment: %s", params.EnvWebhookUrl)
-		}
-
-		HandleExportToJson(params, payload)
-		HandleVerbose(params.Verbose, payload)
-		os.Exit(core.Success)
-	}
 }
 
 func HandleCommand(params *CommandParameters) {
@@ -307,7 +36,7 @@ func HandleCommand(params *CommandParameters) {
 		os.Exit(core.TomlDecodeError)
 	}
 
-	var embeds = GetEmbedsSetting(&config)
+	var embeds = embedsmanager.GetEmbedsSetting(&config)
 	var payload = core.DiscordWebhook{
 		Content:  config.Message.Content,
 		Username: config.Base.Username,
@@ -315,8 +44,45 @@ func HandleCommand(params *CommandParameters) {
 		Embeds:   embeds,
 	}
 
-	HandleDryRun(params, &payload)
-	HandleExplicitMode(&config, &payload, params)
-	HandleLoopSend(&config, &payload, params)
-	HandleWebhookSendOnce(&config, &payload, params)
+	var dryRunContext = whsendflags.DryRunContext{
+		EnableMode: params.DryMode,
+	}
+	dryRunContext.HandleDryRun(&payload)
+
+	var webhookSendOnceContext = whsendflags.WebhookSendContext{
+		IsDryMode:      params.DryMode,
+		IsExplicitMode: params.Explicit,
+		EnvURL:         params.EnvWebhookUrl,
+		ConfigToml:     &config,
+		LoopCount:      params.Loop,
+	}
+	webhookSendOnceContext.HandleWebhookSendOnce(&payload)
+
+	var explicitContext = whsendflags.ExplicitContext{
+		EnableExplicit: params.Explicit,
+		EnvUrlName:     params.EnvWebhookUrl,
+		Config:         &config,
+	}
+	explicitContext.HandleExplicitMode(&payload)
+
+	var loopSendContext = whsendflags.LoopSendContext{
+		DryMode:      params.DryMode,
+		ExplicitMode: params.Explicit,
+		LoopCount:    params.Loop,
+		DelayTime:    params.Delay,
+		EnvUrlName:   params.EnvWebhookUrl,
+		Config:       &config,
+	}
+	loopSendContext.HandleLoopSend(&payload)
+
+	var verboseContext = whsendflags.VerboseContext{
+		EnableVerbose: params.Verbose,
+		EnableDryRun:  params.DryMode,
+	}
+	verboseContext.HandleVerbose(&payload)
+
+	var toJsonContext = whsendflags.ToJsonContext{
+		IsEnableMode: params.ToJson,
+	}
+	toJsonContext.HandleExportToJson(&payload)
 }
