@@ -22,7 +22,7 @@ type CommandParameters struct {
 	ToJson         bool
 }
 
-func HandleCommand(params *CommandParameters) {
+func HandleWebhookSendCommand(params *CommandParameters) {
 	if !core.FileExists(params.TomlConfigPath) {
 
 		core.CriticalShow("File %s does not exists.", params.TomlConfigPath)
