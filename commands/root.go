@@ -1,9 +1,9 @@
 package commands
 
 import (
+	"gohook/commands/config_manager"
 	"gohook/commands/webhook"
 	"gohook/core"
-	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -17,9 +17,10 @@ var rootCommand = &cobra.Command{
 
 func Execute() {
 	rootCommand.AddCommand(webhook.WebhookCommand())
+	rootCommand.AddCommand(config_manager.GenTomlConfigCommand())
 
 	if err := rootCommand.Execute(); err != nil {
-		log.Println(err)
+		core.CriticalShow("Details error: %s", err)
 		os.Exit(core.CommandRunFailed)
 	}
 }
