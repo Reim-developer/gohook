@@ -26,7 +26,7 @@ func GenTomlConfigCommand() *cobra.Command {
 
 	var genTomlCommand = &cobra.Command{
 		Use:   "gen-cfg <TOML_CONFIG_PATH>",
-		Short: "Generate TOML configuration for webhook send by",
+		Short: "Generate TOML configuration for webhook with the given name.",
 		Args:  cobra.ExactArgs(1),
 
 		Run: function,
