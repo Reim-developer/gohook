@@ -2,13 +2,12 @@ package config_manager
 
 import (
 	"gohook/commands/handle"
+	"gohook/core"
 
 	"github.com/spf13/cobra"
 )
 
-type CobraClosure = func(cmd *cobra.Command, args []string)
-
-func handleClosure() CobraClosure {
+func handleClosure() core.CobraClosure {
 	function := func(cmd *cobra.Command, args []string) {
 		var tomlConfigName = args[0]
 
