@@ -13,10 +13,7 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-type StrFunc = func() string
-type VariablesFunc = map[string]func() string
-
-func TimeNow() StrFunc {
+func TimeNow() core.StrFunc {
 	var function = func() string {
 		return time.Now().Format("2006-01-02 15:04:05")
 	}
@@ -24,11 +21,11 @@ func TimeNow() StrFunc {
 	return function
 }
 
-var ConfigVariables = VariablesFunc{
+var ConfigVariables = core.VariablesFunc{
 	"$TIME_NOW": TimeNow(),
 }
 
-func ReplaceVariables(str string, variables VariablesFunc) string {
+func ReplaceVariables(str string, variables core.VariablesFunc) string {
 	pattern := regexp.MustCompile(`\$[A-Z_][A-Z0-9_]*`)
 	matches := pattern.FindAllString(str, -1)
 
@@ -48,13 +45,13 @@ func ReplaceVariables(str string, variables VariablesFunc) string {
 	return str
 }
 
-func ReplaceVariablesInEmbeds(embed *core.DiscordEmbedConfig, variables VariablesFunc) {
+func ReplaceVariablesInEmbeds(embed *core.DiscordEmbedConfig, variables core.VariablesFunc) {
 	embed.Title = ReplaceVariables(embed.Title, variables)
 	embed.Description = ReplaceVariables(embed.Description, variables)
 	embed.Footer.Text = ReplaceVariables(embed.Footer.Text, variables)
 }
 
-func ReplaceVariableInMessage(config *core.DiscordWebhookConfig, variables VariablesFunc) {
+func ReplaceVariableInMessage(config *core.DiscordWebhookConfig, variables core.VariablesFunc) {
 	config.Message.Content = ReplaceVariables(config.Message.Content, variables)
 }
 
