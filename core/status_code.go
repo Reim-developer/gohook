@@ -12,4 +12,7 @@ const (
 	TitleMaxLenError
 	FooterMaxLenError
 	WriteJsonFailed
+	WriteFileFailed
+	CreateFileFailed
+	FlushFileFailed
 )
