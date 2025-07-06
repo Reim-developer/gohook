@@ -2,11 +2,10 @@ package webhook
 
 import (
 	"gohook/commands/handle"
+	"gohook/core"
 
 	"github.com/spf13/cobra"
 )
-
-type CobraClosure = func(cmd *cobra.Command, args []string)
 
 type WebhookSendParameters struct {
 	tomlConfigPath string
@@ -20,7 +19,7 @@ type WebhookSendParameters struct {
 	toJson         bool
 }
 
-func handleClosure(commands *WebhookSendParameters) CobraClosure {
+func handleClosure(commands *WebhookSendParameters) core.CobraClosure {
 	function := func(cmd *cobra.Command, args []string) {
 		commands.tomlConfigPath = args[0]
 
