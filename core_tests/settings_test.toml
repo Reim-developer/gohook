@@ -6,7 +6,11 @@ username = "My User Name"
 avatar_url = "My avatar URL"
 
 [Message]
-content = "Hello World"
+content = "Hello World in $TIME_NOW"
 
-[Embed]
-title = ""
+[[Embeds]]
+title = "Hello world with my customize variable $TIME_NOW"
+description = "Same now: $TIME_NOW"
+
+[Embeds.footer]
+text = "Same now: $TIME_NOW"
