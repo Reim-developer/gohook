@@ -2,6 +2,7 @@ package dsl_tests
 
 import (
 	"fmt"
+	"gohook/dsl"
 	"gohook/dsl/variables/git_vars"
 	"os/exec"
 	"testing"
@@ -35,7 +36,10 @@ func TestWrongCommand(t *testing.T) {
 }
 
 func TestGitDsl(t *testing.T) {
-	var lastGitCommit = git_vars.GetLastCommitHash()
+	var context = dsl.ModeContext{
+		StrictMode: true,
+	}
+	var lastGitCommit = git_vars.GetLastCommitHash(&context)
 
 	t.Log(lastGitCommit())
 }
