@@ -3,6 +3,7 @@ package gen_cfg_flags
 import (
 	"bufio"
 	"gohook/core"
+	"gohook/utils"
 	"os"
 )
 
@@ -29,8 +30,8 @@ type GenTomlConfigContext struct {
 func (context *GenTomlConfigContext) GenTomlConfig() {
 	file, createFailed := os.Create(context.TomlConfigName)
 	if createFailed != nil {
-		core.CriticalShow("Could not create %s", context.TomlConfigName)
-		core.CriticalShow("Full error message: %s", createFailed)
+		utils.CriticalShow("Could not create %s", context.TomlConfigName)
+		utils.CriticalShow("Full error message: %s", createFailed)
 
 		os.Exit(core.CreateFileFailed)
 	}
@@ -39,19 +40,19 @@ func (context *GenTomlConfigContext) GenTomlConfig() {
 	var writer = bufio.NewWriter(file)
 	bytesWrite, writeFailed := writer.WriteString(BasedTomlConfig)
 	if writeFailed != nil {
-		core.CriticalShow("Could not create %s", context.TomlConfigName)
-		core.CriticalShow("Full error message: %s", writeFailed)
+		utils.CriticalShow("Could not create %s", context.TomlConfigName)
+		utils.CriticalShow("Full error message: %s", writeFailed)
 
 		os.Exit(core.WriteFileFailed)
 	}
 
 	flushFailed := writer.Flush()
 	if flushFailed != nil {
-		core.CriticalShow("Could not flush data to %s", context.TomlConfigName)
-		core.CriticalShow("Full error message: %s", flushFailed)
+		utils.CriticalShow("Could not flush data to %s", context.TomlConfigName)
+		utils.CriticalShow("Full error message: %s", flushFailed)
 
 		os.Exit(core.FlushFileFailed)
 	}
 
-	core.InfoShow("Successfully generated: %s (%d bytes written)", context.TomlConfigName, bytesWrite)
+	utils.InfoShow("Successfully generated: %s (%d bytes written)", context.TomlConfigName, bytesWrite)
 }

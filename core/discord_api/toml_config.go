@@ -1,4 +1,4 @@
-package core
+package discord_api
 
 type DiscordWebhookConfig struct {
 	Webhook struct {

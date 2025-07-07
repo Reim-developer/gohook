@@ -1,9 +1,10 @@
-package whsendflags
+package wh_send_flags
 
 import (
 	"bytes"
 	"encoding/json"
 	"gohook/core"
+	"gohook/utils"
 	"os"
 )
 
@@ -22,13 +23,11 @@ func (context *DryRunContext) HandleDryRun(payload *core.DiscordWebhook) {
 		err := encoder.Encode(payload)
 		if err != nil {
 
-			core.CriticalShow("Could not decode JSON: %s", err)
+			utils.CriticalShow("Could not decode JSON: %s", err)
 			os.Exit(core.JsonDecodeError)
 		}
 
-		core.InfoShow("Running in Dry Mode:")
-		core.InfoShow("Your webhook payload:\n%s", buffer.String())
-
-		//HandleExportToJson(params, payload)
+		utils.InfoShow("Running in Dry Mode:")
+		utils.InfoShow("Your webhook payload:\n%s", buffer.String())
 	}
 }

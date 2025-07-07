@@ -1,10 +1,11 @@
-package whsendflags
+package wh_send_flags
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"gohook/core"
+	"gohook/utils"
 	"os"
 )
 
@@ -23,20 +24,20 @@ func (context *ToJsonContext) HandleExportToJson(payload *core.DiscordWebhook) {
 		err := encoder.Encode(payload)
 		if err != nil {
 
-			core.CriticalShow("Could not decode JSON: %s", err)
+			utils.CriticalShow("Could not decode JSON: %s", err)
 			os.Exit(core.JsonDecodeError)
 		}
 
-		var timeNow = core.GetTimeNow()
+		var timeNow = utils.GetTimeNow()
 		var filePath = fmt.Sprintf("%s.json", timeNow)
 		var contentBytes = buffer.Bytes()
 
-		write_err := core.WriteTo(filePath, contentBytes)
+		write_err := utils.WriteTo(filePath, contentBytes)
 		if write_err != nil {
-			core.CriticalShow("Export to JSON FAILED with error: %s", write_err)
+			utils.CriticalShow("Export to JSON FAILED with error: %s", write_err)
 			os.Exit(core.WriteJsonFailed)
 		}
 
-		core.InfoShow("Successfully export your payload to: %s", filePath)
+		utils.InfoShow("Successfully export your payload to: %s", filePath)
 	}
 }

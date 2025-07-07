@@ -1,7 +1,9 @@
-package whsendflags
+package wh_send_flags
 
 import (
 	"gohook/core"
+	"gohook/core/discord_api"
+	"gohook/utils"
 	"os"
 )
 
@@ -24,19 +26,19 @@ func (context *ExplicitContext) HandleExplicitMode(payload *core.DiscordWebhook)
 			useEnv = false
 		}
 
-		var result, err = core.ExplicitSendWebhook(&webhookEnv, payload)
+		var result, err = discord_api.ExplicitSendWebhook(&webhookEnv, payload)
 		if err != nil {
-			core.CriticalShow("Could not send webhook with error: %s", err)
+			utils.CriticalShow("Could not send webhook with error: %s", err)
 			os.Exit(core.WebhookSendFailed)
 		}
 
-		core.InfoShow("Use Explicit Mode:")
-		core.InfoShow("Successfully send webhook")
-		core.InfoShow("Message ID: %s", result.MessageID)
-		core.InfoShow("Channel ID: %s", result.ChannelID)
+		utils.InfoShow("Use Explicit Mode:")
+		utils.InfoShow("Successfully send webhook")
+		utils.InfoShow("Message ID: %s", result.MessageID)
+		utils.InfoShow("Channel ID: %s", result.ChannelID)
 
 		if useEnv {
-			core.InfoShow("This action use environment: %s", context.EnvUrlName)
+			utils.InfoShow("This action use environment: %s", context.EnvUrlName)
 		}
 	}
 }

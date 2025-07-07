@@ -1,4 +1,4 @@
-package core
+package discord_api
 
 import (
 	"bytes"

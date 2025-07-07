@@ -1,8 +1,10 @@
-package embedsmanager
+package embeds_manager
 
 import (
 	"gohook/commands/handle/wh_send_flags/helper"
 	"gohook/core"
+	"gohook/core/discord_api"
+	"gohook/utils"
 )
 
 const (
@@ -11,28 +13,28 @@ const (
 	EmbedFooterMaxLen      = 2048
 )
 
-func CopyOptionalEmbedFields(src *core.DiscordEmbedConfig, dst *core.Embed) {
-	if core.IsNonEmpty(src.Footer.Text) {
-		dst.Footer = &core.EmbedFooter{
+func CopyOptionalEmbedFields(src *core.DiscordEmbedConfig, dst *core.DiscordEmbed) {
+	if utils.IsNonEmpty(src.Footer.Text) {
+		dst.Footer = &discord_api.EmbedFooter{
 			Text: src.Footer.Text,
 		}
 	}
 
-	if core.IsNonEmpty(src.Image.URL) {
-		dst.Image = &core.EmbedImage{
+	if utils.IsNonEmpty(src.Image.URL) {
+		dst.Image = &discord_api.EmbedImage{
 			URL: src.Image.URL,
 		}
 	}
 
-	if core.IsNonEmpty(src.Thumbnail.URL) {
-		dst.Thumbnail = &core.EmbedThumbnail{
+	if utils.IsNonEmpty(src.Thumbnail.URL) {
+		dst.Thumbnail = &discord_api.EmbedThumbnail{
 			URL: src.Thumbnail.URL,
 		}
 	}
 }
 
-func GetEmbedsSetting(config *core.DiscordWebhookConfig) []core.Embed {
-	embeds := make([]core.Embed, 0, len(config.Embeds))
+func GetEmbedsSetting(config *core.DiscordWebhookConfig) []core.DiscordEmbed {
+	embeds := make([]discord_api.Embed, 0, len(config.Embeds))
 
 	for index := range config.Embeds {
 		var embed = &config.Embeds[index]
@@ -41,9 +43,9 @@ func GetEmbedsSetting(config *core.DiscordWebhookConfig) []core.Embed {
 			continue
 		}
 
-		color, err := core.GetHexColor(embed.Color)
+		color, err := utils.GetHexColor(embed.Color)
 		if err != nil {
-			core.InfoShow("Invalid color %s. Fallback to '0'\n", embed.Color)
+			utils.InfoShow("Invalid color %s. Fallback to '0'\n", embed.Color)
 			color = 0
 		}
 
@@ -68,7 +70,7 @@ func GetEmbedsSetting(config *core.DiscordWebhookConfig) []core.Embed {
 			ExitCode:  core.FooterMaxLenError,
 		})
 
-		var newEmbed = core.Embed{
+		var newEmbed = core.DiscordEmbed{
 			Title:       embed.Title,
 			Description: embed.Description,
 			Color:       color,

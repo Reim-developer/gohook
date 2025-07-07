@@ -1,7 +1,7 @@
 package helper
 
 import (
-	"gohook/core"
+	"gohook/utils"
 	"os"
 	"unicode/utf8"
 )
@@ -17,8 +17,8 @@ func AssertMaxLen(max *MaxLenCheck) {
 	var length = utf8.RuneCountInString(max.Value)
 
 	if length > max.MaxLen {
-		core.CriticalShow("Embed [%s] too long (%d characters).", max.FieldName, length)
-		core.InfoShow("Discord only allows up to %d characters.", max.MaxLen)
+		utils.CriticalShow("Embed [%s] too long (%d characters).", max.FieldName, length)
+		utils.InfoShow("Discord only allows up to %d characters.", max.MaxLen)
 		os.Exit(max.ExitCode)
 	}
 }
