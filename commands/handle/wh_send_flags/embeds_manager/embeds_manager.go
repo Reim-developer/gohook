@@ -35,9 +35,14 @@ func CopyOptionalEmbedFields(src *core.DiscordEmbedConfig, dst *core.DiscordEmbe
 	}
 }
 
-func GetEmbedsSetting(config *core.DiscordWebhookConfig) []core.DiscordEmbed {
+func GetEmbedsSetting(strictMode bool, config *core.DiscordWebhookConfig) []core.DiscordEmbed {
+	var modeContext = dsl.ModeContext{
+		StrictMode: strictMode,
+	}
+	var vars = variables.ParseVariables(&modeContext)
+
 	for index := range config.Embeds {
-		dsl.ParseVarsDiscordEmbed(&config.Embeds[index], variables.GoHookVariables)
+		dsl.ParseVarsDiscordEmbed(&config.Embeds[index], vars)
 	}
 
 	embeds := make([]discord_api.Embed, 0, len(config.Embeds))
