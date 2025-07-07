@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 	"time"
 
@@ -61,6 +62,24 @@ func IsNonEmpty(str string) bool {
 
 func InfoShow(format string, a ...any) {
 	fmt.Fprintf(os.Stdout, "[INFO] "+format+"\n", a...)
+}
+
+func RunProgram(program string, argument ...string) (string, error) {
+	command := exec.Command(program, argument...)
+
+	result, err := command.Output()
+
+	if err != nil {
+		return "", fmt.Errorf("%s", err)
+	}
+
+	return string(result), nil
+}
+
+// [!] Only use if strict mode is enabled.
+func FatalNow(statusCode int, format string, a ...any) {
+	fmt.Fprintf(os.Stderr, "[FATAL] "+format+"\n", a...)
+	os.Exit(statusCode)
 }
 
 func CriticalShow(format string, a ...any) {

@@ -23,6 +23,7 @@ type CommandParameters struct {
 	Delay          int
 	Explicit       bool
 	ToJson         bool
+	StrictMode     bool
 }
 
 func getUserConfig(tomlConfigPath string) core.DiscordWebhookConfig {
@@ -37,14 +38,18 @@ func getUserConfig(tomlConfigPath string) core.DiscordWebhookConfig {
 	return config
 }
 
-func loadVariables(config *core.DiscordWebhookConfig) {
-	dsl.ParseVarsDiscordMessage(config, variables.GoHookVariables)
+func loadVariables(strictMode bool, config *core.DiscordWebhookConfig) {
+	var modeContext = dsl.ModeContext{
+		StrictMode: strictMode,
+	}
+	var vars = variables.ParseVariables(&modeContext)
+	dsl.ParseVarsDiscordMessage(config, vars)
 }
 
 func setupFlags(params *CommandParameters) {
 	var config = getUserConfig(params.TomlConfigPath)
-	var embeds = embeds_manager.GetEmbedsSetting(&config)
-	loadVariables(&config)
+	var embeds = embeds_manager.GetEmbedsSetting(params.StrictMode, &config)
+	loadVariables(params.StrictMode, &config)
 
 	var payload = core.DiscordWebhook{
 		Content:  config.Message.Content,
