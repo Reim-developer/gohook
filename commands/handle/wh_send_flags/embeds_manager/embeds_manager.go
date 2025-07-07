@@ -4,6 +4,8 @@ import (
 	"gohook/commands/handle/wh_send_flags/helper"
 	"gohook/core"
 	"gohook/core/discord_api"
+	"gohook/dsl"
+	"gohook/dsl/variables"
 	"gohook/utils"
 )
 
@@ -34,6 +36,10 @@ func CopyOptionalEmbedFields(src *core.DiscordEmbedConfig, dst *core.DiscordEmbe
 }
 
 func GetEmbedsSetting(config *core.DiscordWebhookConfig) []core.DiscordEmbed {
+	for index := range config.Embeds {
+		dsl.ParseVarsDiscordEmbed(&config.Embeds[index], variables.GoHookVariables)
+	}
+
 	embeds := make([]discord_api.Embed, 0, len(config.Embeds))
 
 	for index := range config.Embeds {

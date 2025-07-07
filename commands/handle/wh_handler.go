@@ -5,6 +5,8 @@ import (
 	"gohook/commands/handle/wh_send_flags"
 	"gohook/commands/handle/wh_send_flags/embeds_manager"
 	"gohook/core"
+	"gohook/dsl"
+	"gohook/dsl/variables"
 	"gohook/utils"
 	"os"
 
@@ -35,9 +37,15 @@ func getUserConfig(tomlConfigPath string) core.DiscordWebhookConfig {
 	return config
 }
 
+func loadVariables(config *core.DiscordWebhookConfig) {
+	dsl.ParseVarsDiscordMessage(config, variables.GoHookVariables)
+}
+
 func setupFlags(params *CommandParameters) {
 	var config = getUserConfig(params.TomlConfigPath)
 	var embeds = embeds_manager.GetEmbedsSetting(&config)
+	loadVariables(&config)
+
 	var payload = core.DiscordWebhook{
 		Content:  config.Message.Content,
 		Username: config.Base.Username,
