@@ -17,6 +17,7 @@ type WebhookSendParameters struct {
 	delay          int
 	explicit       bool
 	toJson         bool
+	StrictMode     bool
 }
 
 func handleClosure(commands *WebhookSendParameters) core.CobraClosure {
@@ -33,6 +34,7 @@ func handleClosure(commands *WebhookSendParameters) core.CobraClosure {
 			EnvWebhookUrl:  commands.envUrl,
 			Explicit:       commands.explicit,
 			ToJson:         commands.toJson,
+			StrictMode:     commands.StrictMode,
 		}
 
 		handle.HandleWebhookSendCommand(&arguments)
@@ -50,6 +52,7 @@ func setupCommand(webhookCommand *cobra.Command, commands *WebhookSendParameters
 	webhookCommand.Flags().BoolVarP(&commands.explicit, "explicit", "e", false, "Enable explicit mode")
 	webhookCommand.Flags().StringVarP(&commands.envUrl, "use-env-url", "", "", "Enable environment support")
 	webhookCommand.Flags().BoolVarP(&commands.toJson, "to-json", "", false, "Export payload to JSON")
+	webhookCommand.Flags().BoolVarP(&commands.StrictMode, "strict", "", false, "Enable strict mode")
 }
 
 func WebhookCommand() *cobra.Command {
