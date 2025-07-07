@@ -77,7 +77,7 @@ func RunProgram(program string, argument ...string) (string, error) {
 }
 
 // [!] Only use if strict mode is enabled.
-func FatalNow(format string, statusCode int, a ...any) {
+func FatalNow(statusCode int, format string, a ...any) {
 	fmt.Fprintf(os.Stderr, "[FATAL] "+format+"\n", a...)
 	os.Exit(statusCode)
 }
