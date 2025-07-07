@@ -1,4 +1,4 @@
-package whsendflags
+package wh_send_flags
 
 import "gohook/core"
 
