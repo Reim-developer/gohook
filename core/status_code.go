@@ -15,4 +15,5 @@ const (
 	WriteFileFailed
 	CreateFileFailed
 	FlushFileFailed
+	RunProgramFailed
 )
