@@ -1,7 +1,9 @@
-package whsendflags
+package wh_send_flags
 
 import (
 	"gohook/core"
+	"gohook/core/discord_api"
+	"gohook/utils"
 	"os"
 )
 
@@ -26,16 +28,16 @@ func (context *WebhookSendContext) HandleWebhookSendOnce(payload *core.DiscordWe
 			useEnv = false
 		}
 
-		var err = core.SendWebhook(&webhookEnv, payload)
+		var err = discord_api.SendWebhook(&webhookEnv, payload)
 
 		if err != nil {
-			core.CriticalShow("Critical error: %s\n", err)
+			utils.CriticalShow("Critical error: %s\n", err)
 			os.Exit(core.WebhookSendFailed)
 		}
 
-		core.InfoShow("Successfully send webhook")
+		utils.InfoShow("Successfully send webhook")
 		if useEnv {
-			core.InfoShow("This action use environment: %s", context.ConfigToml)
+			utils.InfoShow("This action use environment: %s", context.ConfigToml)
 		}
 	}
 }
