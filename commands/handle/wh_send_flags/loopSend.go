@@ -17,6 +17,22 @@ type LoopSendContext struct {
 	Config       *core.DiscordWebhookConfig
 }
 
+func NewLoopSend(dryMode bool, explicitMode bool,
+	loopCount int, envUrlName string, delayTime int,
+	config *core.DiscordWebhookConfig) *LoopSendContext {
+
+	loopSendContext := LoopSendContext{
+		DryMode:      dryMode,
+		ExplicitMode: explicitMode,
+		LoopCount:    loopCount,
+		DelayTime:    delayTime,
+		EnvUrlName:   envUrlName,
+		Config:       config,
+	}
+
+	return &loopSendContext
+}
+
 func (context *LoopSendContext) HandleLoopSend(payload *core.DiscordWebhook) {
 	/*
 	* [!] Only run if
