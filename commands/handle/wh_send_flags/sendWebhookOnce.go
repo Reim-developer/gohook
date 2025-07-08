@@ -7,24 +7,37 @@ import (
 	"os"
 )
 
-type WebhookSendContext struct {
-	IsDryMode      bool
-	IsExplicitMode bool
-	EnvURL         string
-	LoopCount      int
-	ConfigToml     *core.DiscordWebhookConfig
+type webhookSendContext struct {
+	isDryMode      bool
+	isExplicitMode bool
+	envURL         string
+	loopCount      int
+	configToml     *core.DiscordWebhookConfig
 }
 
-func (context *WebhookSendContext) HandleWebhookSendOnce(payload *core.DiscordWebhook) {
+func NewWebhookSendOnce(
+	isDryMode bool, isExplicitMode bool,
+	envUrl string, loopCount int, configToml *core.DiscordWebhookConfig) *webhookSendContext {
+
+	webhookSend := webhookSendContext{
+		isDryMode: isDryMode, isExplicitMode: isExplicitMode,
+		envURL: envUrl, loopCount: loopCount,
+		configToml: configToml,
+	}
+
+	return &webhookSend
+}
+
+func (context *webhookSendContext) HandleWebhookSendOnce(payload *core.DiscordWebhook) {
 	var webhookEnv string
 	var useEnv = false
 
-	if !context.IsDryMode && !context.IsExplicitMode && context.LoopCount == 1 {
-		if val := os.Getenv(context.EnvURL); val != "" {
+	if !context.isDryMode && !context.isExplicitMode && context.loopCount == 1 {
+		if val := os.Getenv(context.envURL); val != "" {
 			webhookEnv = val
 			useEnv = true
 		} else {
-			webhookEnv = *context.ConfigToml.Webhook.URL
+			webhookEnv = *context.configToml.Webhook.URL
 			useEnv = false
 		}
 
@@ -37,7 +50,7 @@ func (context *WebhookSendContext) HandleWebhookSendOnce(payload *core.DiscordWe
 
 		utils.InfoShow("Successfully send webhook")
 		if useEnv {
-			utils.InfoShow("This action use environment: %s", context.ConfigToml)
+			utils.InfoShow("This action use environment: %s", context.configToml)
 		}
 	}
 }
