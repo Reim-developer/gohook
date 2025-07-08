@@ -1,10 +1,10 @@
 package wh_send_flags
 
 import (
+	"gohook/commands/handle/wh_send_flags/helper"
 	"gohook/core"
 	"gohook/core/discord_api"
 	"gohook/utils"
-	"os"
 	"time"
 )
 
@@ -43,20 +43,15 @@ func (context *LoopSendContext) HandleLoopSend(payload *core.DiscordWebhook) {
 	if context.LoopCount > 1 && !context.ExplicitMode && !context.DryMode {
 		var successCount = 0
 		var failedCount = 0
-		var webhookEnv string
-		var useEnv = false
+		var envName = context.EnvUrlName
+		var fallbackDefault = context.Config.Webhook.URL
 
-		if val := os.Getenv(context.EnvUrlName); val != "" {
-			webhookEnv = val
-			useEnv = true
-		} else {
-			webhookEnv = *context.Config.Webhook.URL
-			useEnv = false
-		}
+		helper.NewWebhookUrl(fallbackDefault).TryHandleNil()
+		webhookUrl, usedEnv := helper.NewEnvironment(envName, *fallbackDefault).TryGetEnv()
 
 		for index := range context.LoopCount {
 
-			err := discord_api.SendWebhook(&webhookEnv, payload)
+			err := discord_api.SendWebhook(&webhookUrl, payload)
 
 			if err != nil {
 				utils.CriticalShow("Send webhook failed (%d) time(s) %s\n", index, err)
@@ -65,6 +60,7 @@ func (context *LoopSendContext) HandleLoopSend(payload *core.DiscordWebhook) {
 				time.Sleep(time.Duration(context.DelayTime) * time.Second)
 				continue
 			}
+
 			index = index + 1
 			utils.InfoShow("Send webhook success (%d) time(s), delay time: %d", index, context.DelayTime)
 
@@ -75,7 +71,7 @@ func (context *LoopSendContext) HandleLoopSend(payload *core.DiscordWebhook) {
 		utils.InfoShow("Success count: %d time(s)", successCount)
 		utils.InfoShow("Failed count: %d time(s)", failedCount)
 
-		if useEnv {
+		if usedEnv {
 			utils.InfoShow("This action use environment: %s", context.EnvUrlName)
 		}
 
