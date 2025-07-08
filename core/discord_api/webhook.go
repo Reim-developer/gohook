@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"gohook/core/discord_api_error"
 	"net/http"
 )
 
@@ -65,7 +66,20 @@ type WebhookResponse struct {
 	ChannelID string `json:"channel_id"`
 }
 
-func ExplicitSendWebhook(URL *string, webhook *DiscordWebhook) (*WebhookResponse, error) {
+func NewDiscordWebhook(content string, username string,
+	avatarUrl string, embeds []Embed) *DiscordWebhook {
+
+	var discordWebhook = DiscordWebhook{
+		Content:  content,
+		Username: username,
+		Avatar:   avatarUrl,
+		Embeds:   embeds,
+	}
+
+	return &discordWebhook
+}
+
+func (webhook *DiscordWebhook) ExplicitWebhookSend(URL *string) (*WebhookResponse, error) {
 	if URL == nil || *URL == "" {
 		return nil, errors.New("invalid Webhook URL. Please make sure your webhook URL in TOML setting is valid")
 	}
@@ -90,23 +104,36 @@ func ExplicitSendWebhook(URL *string, webhook *DiscordWebhook) (*WebhookResponse
 	return &webhookResponse, nil
 }
 
-func SendWebhook(URL *string, discord_webhook *DiscordWebhook) error {
+type WhenError = discord_api_error.ApiDiscordError
+
+func SendWebhook(URL *string, discord_webhook *DiscordWebhook) *WhenError {
 	if URL == nil || *URL == "" {
-		return errors.New("invalid Webhook URL. Please make sure your webhook URL in TOML setting is valid")
+		var err = errors.New("invalid Webhook URL. Please make sure your webhook URL in TOML setting is valid")
+		var errConext = discord_api_error.MapError(err)
+
+		return errConext
 	}
 
 	payload, _ := json.Marshal(discord_webhook)
 	response, err := http.Post(*URL, "application/json", bytes.NewBuffer(payload))
 
 	if err != nil {
-		return err
+		var errConext = discord_api_error.MapError(err)
+
+		return errConext
 	}
 
 	defer response.Body.Close()
 
 	if response.StatusCode != 204 {
-		return fmt.Errorf("unexpected response status: %d", response.StatusCode)
+		var err = fmt.Errorf("unexpected response status: %d", response.StatusCode)
+
+		var errConext = discord_api_error.MapError(err)
+		return errConext
 	}
 
-	return nil
+	// [!] If error is nothing, do nothing
+	var errConext = discord_api_error.MapError(nil)
+
+	return errConext
 }
