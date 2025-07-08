@@ -7,13 +7,14 @@ $VARIABLE_NAME
 ```
 
 **__Variables list:__**
-| Syntax              | Description                              |
-| ------------------- | ---------------------------------------- |
-| `$USER_HOME`        | Your user home directory.                |
-| `$TIME_NOW`         | Time now, format it's: `YYYY:MM:DD`.     |
-| `$USER_HOSTNAME`    | Your device host name.                   |
-| `$USER_OS`          | Your operating system name.              |
-| `$LAST_COMMIT_HASH` | Get your last commit hash, if available. |
+| Syntax              | Description                                |
+| ------------------- | ------------------------------------------ |
+| `$USER_HOME`        | Your user home directory.                  |
+| `$TIME_NOW`         | Time now, format it's: `YYYY:MM:DD`.       |
+| `$USER_HOSTNAME`    | Your device host name.                     |
+| `$USER_OS`          | Your operating system name.                |
+| `$LAST_COMMIT_HASH` | Get your last commit hash, if available.   |
+| `$GIT_BRANCH`       | Get your current Git branch, if available. |
 * You can find too many  examples [here](#example-usage)
 
 ## Example usage:
@@ -61,3 +62,10 @@ url = "Your webhook URL"
 [message]
 content = "The last commit hash is: $LAST_COMMIT_HASH"
 ```
+
+* Show the current Git branch:
+```toml
+url = "Your webhook URL"
+
+[message]
+content = "The current Git branch is: $GIT_BRANCH"

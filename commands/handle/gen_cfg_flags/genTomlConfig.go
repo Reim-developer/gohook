@@ -23,14 +23,22 @@ avatar_url = "" # Your webhook avatar. Leave blank for default avatar
 content = "Hello World. From GoHook !" # Your first content. Awesome!
 `
 
-type GenTomlConfigContext struct {
-	TomlConfigName string
+type genTomlConfigContext struct {
+	tomlConfigName string
 }
 
-func (context *GenTomlConfigContext) GenTomlConfig() {
-	file, createFailed := os.Create(context.TomlConfigName)
+func NewGenTomlConfig(tomlConfigName string) *genTomlConfigContext {
+	var genTomlConfigContext = genTomlConfigContext{
+		tomlConfigName: tomlConfigName,
+	}
+
+	return &genTomlConfigContext
+}
+
+func (context *genTomlConfigContext) GenTomlConfig() {
+	file, createFailed := os.Create(context.tomlConfigName)
 	if createFailed != nil {
-		utils.CriticalShow("Could not create %s", context.TomlConfigName)
+		utils.CriticalShow("Could not create %s", context.tomlConfigName)
 		utils.CriticalShow("Full error message: %s", createFailed)
 
 		os.Exit(core.CreateFileFailed)
@@ -40,7 +48,7 @@ func (context *GenTomlConfigContext) GenTomlConfig() {
 	var writer = bufio.NewWriter(file)
 	bytesWrite, writeFailed := writer.WriteString(BasedTomlConfig)
 	if writeFailed != nil {
-		utils.CriticalShow("Could not create %s", context.TomlConfigName)
+		utils.CriticalShow("Could not create %s", context.tomlConfigName)
 		utils.CriticalShow("Full error message: %s", writeFailed)
 
 		os.Exit(core.WriteFileFailed)
@@ -48,11 +56,11 @@ func (context *GenTomlConfigContext) GenTomlConfig() {
 
 	flushFailed := writer.Flush()
 	if flushFailed != nil {
-		utils.CriticalShow("Could not flush data to %s", context.TomlConfigName)
+		utils.CriticalShow("Could not flush data to %s", context.tomlConfigName)
 		utils.CriticalShow("Full error message: %s", flushFailed)
 
 		os.Exit(core.FlushFileFailed)
 	}
 
-	utils.InfoShow("Successfully generated: %s (%d bytes written)", context.TomlConfigName, bytesWrite)
+	utils.InfoShow("Successfully generated: %s (%d bytes written)", context.tomlConfigName, bytesWrite)
 }

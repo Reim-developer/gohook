@@ -7,9 +7,5 @@ type GenCfgCommand struct {
 }
 
 func HandleGenCfgCommand(params *GenCfgCommand) {
-	var genTomlConfigContext = gen_cfg_flags.GenTomlConfigContext{
-		TomlConfigName: params.TomlConfigName,
-	}
-
-	genTomlConfigContext.GenTomlConfig()
+	gen_cfg_flags.NewGenTomlConfig(params.TomlConfigName).GenTomlConfig()
 }

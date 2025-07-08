@@ -13,6 +13,14 @@ type ToJsonContext struct {
 	IsEnableMode bool
 }
 
+func NewToJson(enableMode bool) *ToJsonContext {
+	toJsonContext := ToJsonContext{
+		IsEnableMode: enableMode,
+	}
+
+	return &toJsonContext
+}
+
 func (context *ToJsonContext) HandleExportToJson(payload *core.DiscordWebhook) {
 	if context.IsEnableMode {
 		var buffer bytes.Buffer

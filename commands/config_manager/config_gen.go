@@ -21,14 +21,14 @@ func handleClosure() core.CobraClosure {
 }
 
 func GenTomlConfigCommand() *cobra.Command {
-	var function = handleClosure()
+	var function = handleClosure
 
 	var genTomlCommand = &cobra.Command{
 		Use:   "gen-cfg <TOML_CONFIG_PATH>",
 		Short: "Generate TOML configuration for webhook with the given name.",
 		Args:  cobra.ExactArgs(1),
 
-		Run: function,
+		Run: function(),
 	}
 
 	return genTomlCommand
