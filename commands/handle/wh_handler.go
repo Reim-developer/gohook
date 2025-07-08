@@ -5,6 +5,7 @@ import (
 	"gohook/commands/handle/wh_send_flags"
 	"gohook/commands/handle/wh_send_flags/embeds_manager"
 	"gohook/core"
+	"gohook/core/status_code"
 	"gohook/dsl"
 	"gohook/dsl/variables"
 	"gohook/utils"
@@ -32,7 +33,7 @@ func getUserConfig(tomlConfigPath string) core.DiscordWebhookConfig {
 	_, err := toml.DecodeFile(tomlConfigPath, &config)
 	if err != nil {
 		utils.CriticalShow("Could not decode your TOML file: %s\n", err)
-		os.Exit(core.TomlDecodeError)
+		os.Exit(status_code.TomlDecodeError)
 	}
 
 	return config
@@ -82,7 +83,7 @@ func HandleWebhookSendCommand(params *CommandParameters) {
 	if !utils.FileExists(params.TomlConfigPath) {
 
 		utils.CriticalShow("File %s does not exists.", params.TomlConfigPath)
-		os.Exit(core.FileNotFoundError)
+		os.Exit(status_code.FileNotFoundError)
 	}
 
 	setupFlags(params)
