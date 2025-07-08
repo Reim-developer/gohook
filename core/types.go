@@ -9,6 +9,9 @@ import (
 // [!] Type alias of Cobra closure.
 type CobraClosure = func(cmd *cobra.Command, args []string)
 
+// [!] Void closure. Return nothing.
+type VoidClosure = func()
+
 // [!] Type alias of string closure function.
 type StrFunc = func() string
 
