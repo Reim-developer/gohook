@@ -7,22 +7,32 @@ import (
 	"os"
 )
 
-type ExplicitContext struct {
-	EnableExplicit bool
-	EnvUrlName     string
-	Config         *core.DiscordWebhookConfig
+type explicitContext struct {
+	enableExplicit bool
+	envUrlName     string
+	config         *core.DiscordWebhookConfig
 }
 
-func (context *ExplicitContext) HandleExplicitMode(payload *core.DiscordWebhook) {
-	if context.EnableExplicit {
+func NewExplicit(enable bool, envUrl string, config *core.DiscordWebhookConfig) *explicitContext {
+	explicitContext := explicitContext{
+		enableExplicit: enable,
+		envUrlName:     envUrl,
+		config:         config,
+	}
+
+	return &explicitContext
+}
+
+func (context *explicitContext) HandleExplicitMode(payload *core.DiscordWebhook) {
+	if context.enableExplicit {
 		var webhookEnv string
 		var useEnv = false
 
-		if val := os.Getenv(context.EnvUrlName); val != "" {
+		if val := os.Getenv(context.envUrlName); val != "" {
 			webhookEnv = val
 			useEnv = true
 		} else {
-			webhookEnv = *context.Config.Webhook.URL
+			webhookEnv = *context.config.Webhook.URL
 			useEnv = false
 		}
 
@@ -38,7 +48,7 @@ func (context *ExplicitContext) HandleExplicitMode(payload *core.DiscordWebhook)
 		utils.InfoShow("Channel ID: %s", result.ChannelID)
 
 		if useEnv {
-			utils.InfoShow("This action use environment: %s", context.EnvUrlName)
+			utils.InfoShow("This action use environment: %s", context.envUrlName)
 		}
 	}
 }
