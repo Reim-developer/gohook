@@ -14,6 +14,7 @@ func ParseVariables(context *dsl.ModeContext) core.VariablesFunc {
 		"$USER_OS":          utils_vars.UserOS(),
 		"$USER_HOSTNAME":    utils_vars.HostName(),
 		"$LAST_COMMIT_HASH": git_vars.GetLastCommitHash(context),
+		"$GIT_BRANCH":       git_vars.GetBranchName(context),
 	}
 
 	return GoHookVariables
