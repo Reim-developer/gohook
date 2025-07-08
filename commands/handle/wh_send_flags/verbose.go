@@ -13,6 +13,15 @@ type VerboseContext struct {
 	EnableDryRun  bool
 }
 
+func NewVerbose(enableVerbose bool, enableDryMode bool) *VerboseContext {
+	verboseContext := VerboseContext{
+		EnableVerbose: enableVerbose,
+		EnableDryRun:  enableDryMode,
+	}
+
+	return &verboseContext
+}
+
 func (context *VerboseContext) HandleVerbose(payload *core.DiscordWebhook) {
 	if context.EnableVerbose && !context.EnableDryRun {
 		var buffer bytes.Buffer
