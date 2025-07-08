@@ -46,11 +46,7 @@ func loadVariables(strictMode bool, config *core.DiscordWebhookConfig) {
 	dsl.ParseVarsDiscordMessage(config, vars)
 }
 
-func setupFlags(params *CommandParameters) {
-	var config = getUserConfig(params.TomlConfigPath)
-	var embeds = embeds_manager.GetEmbedsSetting(params.StrictMode, &config)
-	loadVariables(params.StrictMode, &config)
-
+func getDiscordPayload(config *core.DiscordWebhookConfig, embeds []core.DiscordEmbed) core.DiscordWebhook {
 	var payload = core.DiscordWebhook{
 		Content:  config.Message.Content,
 		Username: config.Base.Username,
@@ -58,47 +54,28 @@ func setupFlags(params *CommandParameters) {
 		Embeds:   embeds,
 	}
 
-	var dryRunContext = wh_send_flags.DryRunContext{
-		EnableMode: params.DryMode,
-	}
-	dryRunContext.HandleDryRun(&payload)
+	return payload
+}
 
-	var webhookSendOnceContext = wh_send_flags.WebhookSendContext{
-		IsDryMode:      params.DryMode,
-		IsExplicitMode: params.Explicit,
-		EnvURL:         params.EnvWebhookUrl,
-		ConfigToml:     &config,
-		LoopCount:      params.Loop,
-	}
-	webhookSendOnceContext.HandleWebhookSendOnce(&payload)
+func setupFlags(params *CommandParameters) {
+	var config = getUserConfig(params.TomlConfigPath)
+	var embeds = embeds_manager.GetEmbedsSetting(params.StrictMode, &config)
 
-	var explicitContext = wh_send_flags.ExplicitContext{
-		EnableExplicit: params.Explicit,
-		EnvUrlName:     params.EnvWebhookUrl,
-		Config:         &config,
-	}
-	explicitContext.HandleExplicitMode(&payload)
+	loadVariables(params.StrictMode, &config)
+	var payload = getDiscordPayload(&config, embeds)
 
-	var loopSendContext = wh_send_flags.LoopSendContext{
-		DryMode:      params.DryMode,
-		ExplicitMode: params.Explicit,
-		LoopCount:    params.Loop,
-		DelayTime:    params.Delay,
-		EnvUrlName:   params.EnvWebhookUrl,
-		Config:       &config,
-	}
-	loopSendContext.HandleLoopSend(&payload)
+	wh_send_flags.NewDryRun(params.DryMode).HandleDryRun(&payload)
+	wh_send_flags.NewWebhookSendOnce(
+		params.DryMode, params.Explicit,
+		params.EnvWebhookUrl, params.Loop, &config).HandleWebhookSendOnce(&payload)
 
-	var verboseContext = wh_send_flags.VerboseContext{
-		EnableVerbose: params.Verbose,
-		EnableDryRun:  params.DryMode,
-	}
-	verboseContext.HandleVerbose(&payload)
+	wh_send_flags.NewExplicit(params.Explicit, params.EnvWebhookUrl, &config).HandleExplicitMode(&payload)
+	wh_send_flags.NewLoopSend(
+		params.DryMode, params.Explicit, params.Loop,
+		params.EnvWebhookUrl, params.Delay, &config).HandleLoopSend(&payload)
 
-	var toJsonContext = wh_send_flags.ToJsonContext{
-		IsEnableMode: params.ToJson,
-	}
-	toJsonContext.HandleExportToJson(&payload)
+	wh_send_flags.NewVerbose(params.Verbose, params.DryMode).HandleVerbose(&payload)
+	wh_send_flags.NewToJson(params.ToJson).HandleExportToJson(&payload)
 }
 
 func HandleWebhookSendCommand(params *CommandParameters) {
