@@ -8,12 +8,22 @@ import (
 	"os"
 )
 
-type DryRunContext struct {
-	EnableMode bool
+type dryRunContext struct {
+	enableMode bool
 }
 
-func (context *DryRunContext) HandleDryRun(payload *core.DiscordWebhook) {
-	if context.EnableMode {
+func NewDryRun(enableMode bool) *dryRunContext {
+	dryRun := dryRunContext{
+		enableMode: enableMode,
+	}
+
+	return &dryRun
+}
+
+func (context *dryRunContext) HandleDryRun(payload *core.DiscordWebhook) {
+	var enableMode = context.enableMode
+
+	if enableMode {
 		var buffer bytes.Buffer
 		var encoder = json.NewEncoder(&buffer)
 
