@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"gohook/core"
+	"gohook/core/status_code"
 	"gohook/utils"
 	"os"
 )
@@ -34,7 +35,7 @@ func (context *dryRunContext) HandleDryRun(payload *core.DiscordWebhook) {
 		if err != nil {
 
 			utils.CriticalShow("Could not decode JSON: %s", err)
-			os.Exit(core.JsonDecodeError)
+			os.Exit(status_code.JsonDecodeError)
 		}
 
 		utils.InfoShow("Running in Dry Mode:")
