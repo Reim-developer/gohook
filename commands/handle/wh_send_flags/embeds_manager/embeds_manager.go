@@ -4,6 +4,7 @@ import (
 	"gohook/commands/handle/wh_send_flags/helper"
 	"gohook/core"
 	"gohook/core/discord_api"
+	"gohook/core/status_code"
 	"gohook/dsl"
 	"gohook/dsl/variables"
 	"gohook/utils"
@@ -13,6 +14,12 @@ const (
 	EmbedTitleMaxLen       = 256
 	EmbedDescriptionMaxLen = 2048
 	EmbedFooterMaxLen      = 2048
+)
+
+const (
+	Description = "Description"
+	Title       = "Title"
+	Footer      = "Footer"
 )
 
 func CopyOptionalEmbedFields(src *core.DiscordEmbedConfig, dst *core.DiscordEmbed) {
@@ -60,26 +67,10 @@ func GetEmbedsSetting(strictMode bool, config *core.DiscordWebhookConfig) []core
 			color = 0
 		}
 
-		helper.AssertMaxLen(&helper.MaxLenCheck{
-			FieldName: "Descripton",
-			Value:     embed.Description,
-			MaxLen:    EmbedDescriptionMaxLen,
-			ExitCode:  core.DescriptionMaxLenError,
-		})
-
-		helper.AssertMaxLen(&helper.MaxLenCheck{
-			FieldName: "Title",
-			Value:     embed.Title,
-			MaxLen:    EmbedTitleMaxLen,
-			ExitCode:  core.TitleMaxLenError,
-		})
-
-		helper.AssertMaxLen(&helper.MaxLenCheck{
-			FieldName: "Footer",
-			Value:     embed.Footer.Text,
-			MaxLen:    EmbedFooterMaxLen,
-			ExitCode:  core.FooterMaxLenError,
-		})
+		helper.NewAssertEmbed(status_code.MaxLengthEmbedError).
+			TryAssertEmbedLen(Description, embed.Description, EmbedFooterMaxLen).
+			TryAssertEmbedLen(Title, embed.Title, EmbedTitleMaxLen).
+			TryAssertEmbedLen(Footer, embed.Footer.Text, EmbedFooterMaxLen)
 
 		var newEmbed = core.DiscordEmbed{
 			Title:       embed.Title,

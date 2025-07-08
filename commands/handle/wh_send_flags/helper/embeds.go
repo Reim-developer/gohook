@@ -6,19 +6,27 @@ import (
 	"unicode/utf8"
 )
 
-type MaxLenCheck struct {
-	FieldName string
-	Value     string
-	MaxLen    int
-	ExitCode  int
+type AssertDiscordEmbed struct {
+	ExitCode int
 }
 
-func AssertMaxLen(max *MaxLenCheck) {
-	var length = utf8.RuneCountInString(max.Value)
+func NewAssertEmbed(exitCode int) *AssertDiscordEmbed {
 
-	if length > max.MaxLen {
-		utils.CriticalShow("Embed [%s] too long (%d characters).", max.FieldName, length)
-		utils.InfoShow("Discord only allows up to %d characters.", max.MaxLen)
-		os.Exit(max.ExitCode)
+	var assert = AssertDiscordEmbed{
+		ExitCode: exitCode,
 	}
+
+	return &assert
+}
+
+func (assertContext *AssertDiscordEmbed) TryAssertEmbedLen(fieldName string, value string, maxChar int) *AssertDiscordEmbed {
+	var length = utf8.RuneCountInString(value)
+
+	if length > maxChar {
+		utils.CriticalShow("Embed [%s] too long (%d characters).", fieldName, length)
+		utils.InfoShow("Discord only allows up to %d characters.", maxChar)
+		os.Exit(assertContext.ExitCode)
+	}
+
+	return assertContext
 }

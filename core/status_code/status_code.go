@@ -1,4 +1,4 @@
-package core
+package status_code
 
 const (
 	Success = iota
@@ -8,12 +8,11 @@ const (
 	FileNotFoundError
 	TomlDecodeError
 	JsonDecodeError
-	DescriptionMaxLenError
-	TitleMaxLenError
-	FooterMaxLenError
+	MaxLengthEmbedError
 	WriteJsonFailed
 	WriteFileFailed
 	CreateFileFailed
 	FlushFileFailed
 	RunProgramFailed
+	FieldNotProvided
 )

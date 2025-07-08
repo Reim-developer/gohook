@@ -2,7 +2,7 @@ package gen_cfg_flags
 
 import (
 	"bufio"
-	"gohook/core"
+	"gohook/core/status_code"
 	"gohook/utils"
 	"os"
 )
@@ -41,7 +41,7 @@ func (context *genTomlConfigContext) GenTomlConfig() {
 		utils.CriticalShow("Could not create %s", context.tomlConfigName)
 		utils.CriticalShow("Full error message: %s", createFailed)
 
-		os.Exit(core.CreateFileFailed)
+		os.Exit(status_code.CreateFileFailed)
 	}
 	defer file.Close()
 
@@ -51,7 +51,7 @@ func (context *genTomlConfigContext) GenTomlConfig() {
 		utils.CriticalShow("Could not create %s", context.tomlConfigName)
 		utils.CriticalShow("Full error message: %s", writeFailed)
 
-		os.Exit(core.WriteFileFailed)
+		os.Exit(status_code.WriteFileFailed)
 	}
 
 	flushFailed := writer.Flush()
@@ -59,7 +59,7 @@ func (context *genTomlConfigContext) GenTomlConfig() {
 		utils.CriticalShow("Could not flush data to %s", context.tomlConfigName)
 		utils.CriticalShow("Full error message: %s", flushFailed)
 
-		os.Exit(core.FlushFileFailed)
+		os.Exit(status_code.FlushFileFailed)
 	}
 
 	utils.InfoShow("Successfully generated: %s (%d bytes written)", context.tomlConfigName, bytesWrite)

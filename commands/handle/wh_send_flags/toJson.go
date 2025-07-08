@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"gohook/core"
+	"gohook/core/status_code"
 	"gohook/utils"
 	"os"
 )
@@ -33,7 +34,7 @@ func (context *ToJsonContext) HandleExportToJson(payload *core.DiscordWebhook) {
 		if err != nil {
 
 			utils.CriticalShow("Could not decode JSON: %s", err)
-			os.Exit(core.JsonDecodeError)
+			os.Exit(status_code.JsonDecodeError)
 		}
 
 		var timeNow = utils.GetTimeNow()
@@ -43,7 +44,7 @@ func (context *ToJsonContext) HandleExportToJson(payload *core.DiscordWebhook) {
 		write_err := utils.WriteTo(filePath, contentBytes)
 		if write_err != nil {
 			utils.CriticalShow("Export to JSON FAILED with error: %s", write_err)
-			os.Exit(core.WriteJsonFailed)
+			os.Exit(status_code.WriteJsonFailed)
 		}
 
 		utils.InfoShow("Successfully export your payload to: %s", filePath)

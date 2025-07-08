@@ -1,7 +1,7 @@
 package dsl_helper
 
 import (
-	"gohook/core"
+	"gohook/core/status_code"
 	"gohook/dsl"
 	"gohook/utils"
 )
@@ -29,7 +29,7 @@ func (programContext *programErrorContext) HandleProgramError() {
 
 	if err != nil {
 		if isStrictMode {
-			var statusCode = core.RunProgramFailed
+			var statusCode = status_code.RunProgramFailed
 
 			// [!] Exit now. Don't return anything if strict mode is enabled.
 			utils.FatalNow(statusCode, "Could not run program '%s' with error: %s.", programName, err)
