@@ -1,8 +1,10 @@
 package wh_send_flags
 
 import (
+	"gohook/commands/handle/wh_send_flags/helper"
 	"gohook/core"
 	"gohook/core/discord_api"
+	"gohook/core/status_code"
 	"gohook/utils"
 	"os"
 )
@@ -25,21 +27,18 @@ func NewExplicit(enable bool, envUrl string, config *core.DiscordWebhookConfig) 
 
 func (context *explicitContext) HandleExplicitMode(payload *core.DiscordWebhook) {
 	if context.enableExplicit {
-		var webhookEnv string
-		var useEnv = false
+		var envName = context.envUrlName
+		var fallbackDefault = context.config.Webhook.URL
 
-		if val := os.Getenv(context.envUrlName); val != "" {
-			webhookEnv = val
-			useEnv = true
-		} else {
-			webhookEnv = *context.config.Webhook.URL
-			useEnv = false
-		}
+		helper.NewWebhookUrl(fallbackDefault).TryHandleNil()
+		webhookURL, usedEnv := helper.NewEnvironment(envName, *fallbackDefault).TryGetEnv()
 
-		var result, err = discord_api.ExplicitSendWebhook(&webhookEnv, payload)
+		var discordWebhook = discord_api.NewDiscordWebhook(payload.Content, payload.Username, payload.Avatar, payload.Embeds)
+		var result, err = discordWebhook.ExplicitWebhookSend(&webhookURL)
+
 		if err != nil {
 			utils.CriticalShow("Could not send webhook with error: %s", err)
-			os.Exit(core.WebhookSendFailed)
+			os.Exit(status_code.WebhookSendFailed)
 		}
 
 		utils.InfoShow("Use Explicit Mode:")
@@ -47,7 +46,7 @@ func (context *explicitContext) HandleExplicitMode(payload *core.DiscordWebhook)
 		utils.InfoShow("Message ID: %s", result.MessageID)
 		utils.InfoShow("Channel ID: %s", result.ChannelID)
 
-		if useEnv {
+		if usedEnv {
 			utils.InfoShow("This action use environment: %s", context.envUrlName)
 		}
 	}
