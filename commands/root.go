@@ -4,7 +4,7 @@ import (
 	"gohook/commands/config_manager"
 	"gohook/commands/setup_helper"
 	"gohook/commands/webhook"
-	"gohook/core"
+	"gohook/core/status_code"
 	"gohook/utils"
 	"os"
 
@@ -29,6 +29,6 @@ func Execute() {
 
 	if err := rootCommand.Execute(); err != nil {
 		utils.CriticalShow("Details error: %s", err)
-		os.Exit(core.CommandRunFailed)
+		os.Exit(status_code.CommandRunFailed)
 	}
 }
