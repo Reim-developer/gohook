@@ -43,6 +43,7 @@ func loadVariables(strictMode bool, config *core.DiscordWebhookConfig) {
 	var modeContext = dsl.ModeContext{
 		StrictMode: strictMode,
 	}
+
 	var vars = variables.ParseVariables(&modeContext)
 	dsl.ParseVarsDiscordMessage(config, vars)
 }
