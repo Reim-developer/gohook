@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"gohook/core/discord_api_error"
 	"net/http"
 )
 
@@ -104,23 +103,18 @@ func (webhook *DiscordWebhook) ExplicitWebhookSend(URL *string) (*WebhookRespons
 	return &webhookResponse, nil
 }
 
-type WhenError = discord_api_error.ApiDiscordError
-
-func SendWebhook(URL *string, discord_webhook *DiscordWebhook) *WhenError {
+func SendWebhook(URL *string, discord_webhook *DiscordWebhook) error {
 	if URL == nil || *URL == "" {
 		var err = errors.New("invalid Webhook URL. Please make sure your webhook URL in TOML setting is valid")
-		var errConext = discord_api_error.MapError(err)
 
-		return errConext
+		return err
 	}
 
 	payload, _ := json.Marshal(discord_webhook)
 	response, err := http.Post(*URL, "application/json", bytes.NewBuffer(payload))
 
 	if err != nil {
-		var errConext = discord_api_error.MapError(err)
-
-		return errConext
+		return err
 	}
 
 	defer response.Body.Close()
@@ -128,12 +122,8 @@ func SendWebhook(URL *string, discord_webhook *DiscordWebhook) *WhenError {
 	if response.StatusCode != 204 {
 		var err = fmt.Errorf("unexpected response status: %d", response.StatusCode)
 
-		var errConext = discord_api_error.MapError(err)
-		return errConext
+		return err
 	}
 
-	// [!] If error is nothing, do nothing
-	var errConext = discord_api_error.MapError(nil)
-
-	return errConext
+	return nil
 }
