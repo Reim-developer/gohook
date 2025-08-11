@@ -36,11 +36,16 @@ func (context *webhookSendContext) HandleWebhookSendOnce(payload *core.DiscordWe
 		helper.NewWebhookUrl(fallbackDefault).TryHandleNil()
 		webhookURL, usedEnv := helper.NewEnvironment(envName, *fallbackDefault).TryGetEnv()
 
-		discord_api.SendWebhook(&webhookURL, payload).
-			Try().ShowSuccess("Successfully Send Webhook")
+		var err = discord_api.SendWebhook(&webhookURL, payload)
+		if err != nil {
+			utils.CriticalShow("Could not send webhook with error: %s", err)
+			return
+		}
 
 		if usedEnv {
 			utils.InfoShow("This action use environment: %s", context.envUrlName)
 		}
+
+		utils.InfoShow("Successfully send webhook")
 	}
 }
